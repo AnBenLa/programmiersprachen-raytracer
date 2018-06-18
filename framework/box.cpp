@@ -1,8 +1,10 @@
 #include "box.hpp"
 #include <glm/vec3.hpp>
 #include "shape.hpp"
+#include "color.hpp"
 
-Box::Box(glm::vec3 min, glm::vec3 max) : Shape{},min_ { min }, max_{ max } {};
+Box::Box(glm::vec3 min, glm::vec3 max, std::string name, Color color) : 
+	Shape{ name, color }, min_{ min }, max_{ max } {};
 
 double Box::area() const{
 	double x = max_.x - min_.x;

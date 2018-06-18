@@ -3,8 +3,10 @@
 #include <glm/vec3.hpp>
 #include <math.h>
 #include "shape.hpp"
+#include "color.hpp"
 
-Sphere::Sphere(glm::vec3 center, double radius) : Shape{}, center_ { center }, radius_{ radius } {};
+Sphere::Sphere(glm::vec3 center, double radius, std::string name, Color color) : 
+	Shape{name, color}, center_ { center }, radius_{ radius } {};
 
 double Sphere::area() const{
 	return 4 * M_PI * pow(radius_,2);
