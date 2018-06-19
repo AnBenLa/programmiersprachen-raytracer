@@ -1,6 +1,7 @@
 #include <glm/vec3.hpp>
 #include "shape.hpp"
 #include "color.hpp"
+#include "ray.hpp"
 
 class Sphere : public Shape{
 public:
@@ -8,6 +9,7 @@ public:
 	double area() const override;
 	double volume() const override;
 	std::ostream& print(std::ostream& os) const override;
+	bool intersect(Ray const&) const;
 	glm::vec3 center() const;
 	double radius() const;
 private:

@@ -1,6 +1,8 @@
 #define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
 #include <glm/vec3.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtx/intersect.hpp>
 #include "../framework/sphere.hpp"
 #include "../framework/box.hpp"
 #include "../framework/color.hpp"
@@ -74,3 +76,23 @@ TEST_CASE("Box test") {
 	std::cout << *a;
 }
 
+//Wie genau ist das gemeint?
+TEST_CASE(" intersect_ray_sphere ")
+{
+	glm::vec3 position{ 0.0,1.0,3.0 };
+	Color color{ 1.0,1.0,0.0 };
+	std::string name = "Toto";
+	auto a = std::make_shared<Sphere>(position, 5.0, name, color);
+	
+	REQUIRE(a->intersect(*(new Ray{})));
+
+
+	glm::vec3 ray_origin{ 0.0f, 0.0f, 0.0f };
+	glm::vec3 ray_direction{ 0.0f, 0.0f, 1.0f };
+	glm::vec3 sphere_center{ 0.0f ,0.0f, 5.0f };
+	float sphere_radius{ 1.0f };
+	float distance = 0.0f;
+	auto result = glm::intersectRaySphere(ray_origin, ray_direction, sphere_center, sphere_radius * sphere_radius, distance);
+	
+	REQUIRE(distance == Approx(4.0f));
+}
