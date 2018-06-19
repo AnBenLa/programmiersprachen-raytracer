@@ -2,6 +2,7 @@
 #include <glm/vec3.hpp>
 #include "shape.hpp"
 #include "color.hpp"
+#include <string>
 
 Box::Box(glm::vec3 min, glm::vec3 max, std::string name, Color color) : 
 	Shape{ name, color }, min_{ min }, max_{ max } {};

@@ -4,6 +4,7 @@
 #include <math.h>
 #include "shape.hpp"
 #include "color.hpp"
+#include <string>
 
 Sphere::Sphere(glm::vec3 center, double radius, std::string name, Color color) : 
 	Shape{name, color}, center_ { center }, radius_{ radius } {};

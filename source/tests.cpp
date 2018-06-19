@@ -4,6 +4,7 @@
 #include "../framework/sphere.hpp"
 #include "../framework/box.hpp"
 #include "../framework/color.hpp"
+#include "../framework/shape.hpp"
 
 int main(int argc, char *argv[])
 {
