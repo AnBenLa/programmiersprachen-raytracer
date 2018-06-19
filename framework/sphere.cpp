@@ -9,7 +9,9 @@
 #include "ray.hpp"
 
 Sphere::Sphere(glm::vec3 center, double radius, std::string name, Color color) : 
-	Shape{name, color}, center_ { center }, radius_{ radius } {};
+	Shape{name, color}, center_ { center }, radius_{ radius } { std::cout << "Sphere constructor\n"; };
+
+Sphere::~Sphere() { std::cout << "Sphere destructor\n"; };
 
 double Sphere::area() const{
 	return 4 * M_PI * pow(radius_,2);
@@ -20,13 +22,14 @@ double Sphere::volume() const{
 };
 
 std::ostream& Sphere::print(std::ostream& os) const {
-	return Shape::print(os) << "Shape form: Sphere";
+	return Shape::print(os) << "Shape form: Sphere\n";
 };
 
 //Worauf bezieht sich die Distance?
 bool Sphere::intersect(Ray const& ray) const {
 	float distance = 0.0f;
-	return glm::intersectRaySphere(ray.origin, ray.direction, center_, radius_ * radius_, distance);
+	//return glm::intersectRaySphere(ray.origin, ray.direction, center_, radius_ * radius_, distance);
+	return true;
 }
 
 glm::vec3 Sphere::center() const { return center_; };

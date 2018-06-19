@@ -6,7 +6,8 @@
 
 class Shape {
 public:
-	Shape(std::string name, Color color) : name_{ name }, color_{color} {};
+	Shape(std::string name, Color color) : name_{ name }, color_{ color } { std::cout << "Base constructor\n"; };
+	~Shape() { std::cout << "Base destructor\n";  };
 	virtual double area() const = 0;
 	virtual double volume() const = 0;
 	virtual std::ostream& print(std::ostream& os) const {

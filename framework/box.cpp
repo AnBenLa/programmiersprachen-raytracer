@@ -5,7 +5,9 @@
 #include <string>
 
 Box::Box(glm::vec3 min, glm::vec3 max, std::string name, Color color) : 
-	Shape{ name, color }, min_{ min }, max_{ max } {};
+	Shape{ name, color }, min_{ min }, max_{ max } { std::cout << "Box constructor\n"; };
+
+Box::~Box() { std::cout << "Base destructor\n"; }
 
 double Box::area() const{
 	double x = max_.x - min_.x;
@@ -22,7 +24,7 @@ double Box::volume() const{
 };
 
 std::ostream& Box::print(std::ostream& os) const {
-	return Shape::print(os) << "Shape form: Box";
+	return Shape::print(os) << "Shape form: Box\n";
 };
 
 glm::vec3 Box::min() const {

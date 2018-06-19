@@ -41,7 +41,9 @@ TEST_CASE("Sphere test") {
 		REQUIRE(a->name().compare("Toto") == 0.0);
 	}
 
-	std::cout << *a;
+	SECTION("print out test") {
+		std::cout << *a;
+	}
 }
 
 TEST_CASE("Box test") {
@@ -73,7 +75,9 @@ TEST_CASE("Box test") {
 		REQUIRE(a->name().compare("Africa") == 0.0);
 	}
 
-	std::cout << *a;
+	SECTION("print out test"){
+		std::cout << *a;
+	}
 }
 
 //Wie genau ist das gemeint?
@@ -95,4 +99,17 @@ TEST_CASE(" intersect_ray_sphere ")
 	auto result = glm::intersectRaySphere(ray_origin, ray_direction, sphere_center, sphere_radius * sphere_radius, distance);
 	
 	REQUIRE(distance == Approx(4.0f));
+}
+
+TEST_CASE("constructor and destructor order") {
+	std::cout << "-------------------------------------------------------\n";
+	Color red{ 255 , 0 , 0 };
+	glm::vec3 position{ 0.0f, 0.0f, 0.0f };
+	Sphere * s1 = new Sphere{ position , 1.2f, " sphere0 ", red };
+	Shape * s2 = new Sphere{ position , 1.2f, " sphere1 ", red };
+	s1 -> print(std::cout);
+	s2 -> print(std::cout);
+
+	delete s1;
+	delete s2;
 }
