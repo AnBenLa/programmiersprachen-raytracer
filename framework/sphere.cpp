@@ -17,6 +17,10 @@ double Sphere::volume() const{
 	return (4.0 / 3.0) * M_PI * pow(radius_, 3);
 };
 
+std::ostream& Sphere::print(std::ostream& os) const {
+	return Shape::print(os) << "Shape form: Sphere";
+};
+
 glm::vec3 Sphere::center() const { return center_; };
 
 double Sphere::radius() const { return radius_; };

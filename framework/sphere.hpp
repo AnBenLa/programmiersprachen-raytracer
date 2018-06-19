@@ -7,6 +7,7 @@ public:
 	Sphere(glm::vec3 center, double radius,std::string name, Color color);
 	double area() const override;
 	double volume() const override;
+	std::ostream& print(std::ostream& os) const override;
 	glm::vec3 center() const;
 	double radius() const;
 private:

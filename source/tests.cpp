@@ -38,6 +38,8 @@ TEST_CASE("Sphere test") {
 		REQUIRE(a->color().b == 0.0);
 		REQUIRE(a->name().compare("Toto") == 0.0);
 	}
+
+	std::cout << *a;
 }
 
 TEST_CASE("Box test") {
@@ -68,5 +70,7 @@ TEST_CASE("Box test") {
 		REQUIRE(a->color().b == 1.0);
 		REQUIRE(a->name().compare("Africa") == 0.0);
 	}
+
+	std::cout << *a;
 }
 

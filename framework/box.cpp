@@ -21,6 +21,10 @@ double Box::volume() const{
 	return x*y*z;
 };
 
+std::ostream& Box::print(std::ostream& os) const {
+	return Shape::print(os) << "Shape form: Box";
+};
+
 glm::vec3 Box::min() const {
 	return min_;
 }
