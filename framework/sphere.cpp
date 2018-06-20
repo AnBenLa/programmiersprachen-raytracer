@@ -26,10 +26,8 @@ std::ostream& Sphere::print(std::ostream& os) const {
 };
 
 //Worauf bezieht sich die Distance?
-bool Sphere::intersect(Ray const& ray) const {
-	float distance = 0.0f;
-	//return glm::intersectRaySphere(ray.origin, ray.direction, center_, radius_ * radius_, distance);
-	return true;
+bool Sphere::intersect(Ray const& ray, float& distance) const {
+	return glm::intersectRaySphere(ray.origin, ray.direction, center_, radius_ * radius_, distance);
 }
 
 glm::vec3 Sphere::center() const { return center_; };

@@ -87,15 +87,15 @@ TEST_CASE(" intersect_ray_sphere ")
 	Color color{ 1.0,1.0,0.0 };
 	std::string name = "Toto";
 	auto a = std::make_shared<Sphere>(position, 5.0, name, color);
-	
-	REQUIRE(a->intersect(*(new Ray{})));
+	float distance = 0.0f;
+	REQUIRE(a->intersect(*(new Ray{}), distance));
 
 
 	glm::vec3 ray_origin{ 0.0f, 0.0f, 0.0f };
 	glm::vec3 ray_direction{ 0.0f, 0.0f, 1.0f };
 	glm::vec3 sphere_center{ 0.0f ,0.0f, 5.0f };
 	float sphere_radius{ 1.0f };
-	float distance = 0.0f;
+	distance = 0.0f;
 	auto result = glm::intersectRaySphere(ray_origin, ray_direction, sphere_center, sphere_radius * sphere_radius, distance);
 	
 	REQUIRE(distance == Approx(4.0f));
