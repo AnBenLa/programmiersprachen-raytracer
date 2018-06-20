@@ -83,13 +83,13 @@ TEST_CASE("Box test") {
 //Wie genau ist das gemeint?
 TEST_CASE(" intersect_ray_sphere ")
 {
-	glm::vec3 position{ 0.0,1.0,3.0 };
+	glm::vec3 position{ 0.0f, 0.0f, 5.0f };
 	Color color{ 1.0,1.0,0.0 };
 	std::string name = "Toto";
-	auto a = std::make_shared<Sphere>(position, 5.0, name, color);
+	auto a = std::make_shared<Sphere>(position, 1.0f, name, color);
 	float distance = 0.0f;
-	REQUIRE(a->intersect(*(new Ray{}), distance));
-
+	a->intersect(*(new Ray{}), distance);
+	REQUIRE(distance == Approx(-4.0f));
 
 	glm::vec3 ray_origin{ 0.0f, 0.0f, 0.0f };
 	glm::vec3 ray_direction{ 0.0f, 0.0f, 1.0f };
