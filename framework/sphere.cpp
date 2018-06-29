@@ -8,8 +8,8 @@
 #include <glm/gtx/intersect.hpp>
 #include "ray.hpp"
 
-Sphere::Sphere(glm::vec3 center, double radius, std::string name, Color color) : 
-	Shape{name, color}, center_ { center }, radius_{ radius } { std::cout << "Sphere constructor\n"; };
+Sphere::Sphere(glm::vec3 center, double radius, std::string name, std::shared_ptr<Material> material) :
+	Shape{name, material}, center_ { center }, radius_{ radius } { std::cout << "Sphere constructor\n"; };
 
 Sphere::~Sphere() { std::cout << "Sphere destructor\n"; };
 

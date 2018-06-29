@@ -7,7 +7,7 @@
 
 class Sphere : public Shape{
 public:
-	Sphere(glm::vec3 center, double radius,std::string name, Color color);
+	Sphere(glm::vec3 center, double radius,std::string name, std::shared_ptr<Material> material);
 	~Sphere();
 	double area() const override;
 	double volume() const override;

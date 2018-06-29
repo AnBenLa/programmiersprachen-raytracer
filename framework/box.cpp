@@ -6,8 +6,8 @@
 #include "ray.hpp"
 #include <string>
 
-Box::Box(glm::vec3 min, glm::vec3 max, std::string name, Color color) : 
-	Shape{ name, color }, min_{ min }, max_{ max } { std::cout << "Box constructor\n"; };
+Box::Box(glm::vec3 min, glm::vec3 max, std::string name, std::shared_ptr<Material> material) :
+	Shape{ name, material }, min_{ min }, max_{ max } { std::cout << "Box constructor\n"; };
 
 Box::~Box() { std::cout << "Base destructor\n"; }
 

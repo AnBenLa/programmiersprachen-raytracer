@@ -3,16 +3,16 @@
 #include <iostream>
 #include <string>
 
-Shape::Shape(std::string name, Color color) : name_{ name }, color_{ color } { std::cout << "Base constructor\n"; };
+Shape::Shape(std::string name, std::shared_ptr<Material> material) : name_{ name }, material_{ material } { std::cout << "Base constructor\n"; };
 
 Shape::~Shape() { std::cout << "Base destructor\n"; };
 
 std::ostream& Shape::print(std::ostream& os) const 
-{ return os << "Shape name: " << name_ << " Shape color: " << color_; };
+{ return os << "Shape name: " << name_ << " Shape material: " << material_; };
 
 std::string Shape::name() const { return name_; };
 
-Color Shape::color() const { return color_; };
+std::shared_ptr<Material> Shape::material() const { return material_; };
 
 std::ostream& operator <<(std::ostream& os, Shape const& s)
 {	return s.print(os); }
