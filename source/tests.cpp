@@ -7,6 +7,7 @@
 #include "../framework/box.hpp"
 #include "../framework/color.hpp"
 #include "../framework/shape.hpp"
+#include "../framework/scene.hpp" 
 
 int main(int argc, char *argv[])
 {
@@ -94,7 +95,11 @@ TEST_CASE("Box test") {
 	}
 }
 
-//Wie genau ist das gemeint?
+TEST_CASE("Scene test") {
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+	readSDF_File("C:\\Users\\Mortiferum\\VisualStudioProjects\\Übung - 5\\programmiersprachen - raytracer\\Übung - 6\\Example.sdf");
+}
+
 TEST_CASE(" intersect_ray_sphere ")
 {
 	glm::vec3 position{ 0.0f, 0.0f, 5.0f };

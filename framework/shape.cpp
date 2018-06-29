@@ -8,7 +8,7 @@ Shape::Shape(std::string name, std::shared_ptr<Material> material) : name_{ name
 Shape::~Shape() { std::cout << "Base destructor\n"; };
 
 std::ostream& Shape::print(std::ostream& os) const 
-{ return os << "Shape name: " << name_ << " Shape material: " << material_; };
+{ return os << "Shape name: " << name_ << " Shape material: " << *material_; };
 
 std::string Shape::name() const { return name_; };
 

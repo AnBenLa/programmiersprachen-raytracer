@@ -10,8 +10,10 @@ struct Material {
 	Color kd;
 	Color ks;
 	float m;
-	std::ostream& operator <<(std::ostream& os) {
-		return os << "\n Farbe: \n Name: " << name << " , Ka: " << ka << " , Kd: " << kd << " , Ks: " << ks << " , m: " << m << "\n";
+	friend std::ostream& operator<<(std::ostream& os, Material const& m)
+	{
+		os << "\n Name: " << m.name << " , Ka: " << m.ka << " , Kd: " << m.kd << " , Ks: " << m.ks << " , m: " << m.m << "\n";
+		return os;
 	}
 };
 #endif
