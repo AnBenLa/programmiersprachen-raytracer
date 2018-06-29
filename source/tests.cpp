@@ -78,6 +78,33 @@ TEST_CASE("Box test") {
 	SECTION("print out test"){
 		std::cout << *a;
 	}
+
+	SECTION("Intersection test") {
+		//ray doesnt cut box
+		float distance = 0.0f;
+		REQUIRE(!a->intersect(*new Ray{}, distance));
+
+		//ray cuts box which is in front
+		glm::vec3 min_1{ -1.0,-1.0,-2.0 };
+		glm::vec3 max_1{ 1.0,1.0,-3.0 };
+		auto b = std::make_shared<Box>(min_1, max_1, name, color);
+		REQUIRE(b->intersect(*new Ray{}, distance));
+		REQUIRE(distance > 0);
+
+		//ray cuts box but its behind
+		glm::vec3 min_2{ -1.0,-1.0, 2.0 };
+		glm::vec3 max_2{ 1.0,1.0, 3.0 };
+		auto c = std::make_shared<Box>(min_2, max_2, name, color);
+		REQUIRE(c->intersect(*new Ray{}, distance));
+		REQUIRE(distance < 0);
+
+		//ray inside box 
+		glm::vec3 min_3{ -1.0,-1.0, 1.0 };
+		glm::vec3 max_3{ 1.0,1.0, -4.0 };
+		auto d = std::make_shared<Box>(min_3, max_3, name, color);
+		REQUIRE(d->intersect(*new Ray{}, distance));
+		REQUIRE(distance > 0);
+	}
 }
 
 //Wie genau ist das gemeint?
