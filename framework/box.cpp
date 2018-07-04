@@ -49,8 +49,8 @@ bool Box::intersect(Ray const& ray, float& t) const{
 		auto s1 = (point.y < max_.y && point.y > min_.y && point.z < max_.z && point.z > min_.z);
 		auto s2 = (point2.y < max_.y && point2.y > min_.y && point2.z < max_.z && point2.z > min_.z);
 		//calculates the distance between the intersection points and the ray origin
-		auto dist_point = glm::distance(point, origin);
-		auto dist_point2 = glm::distance(point2, origin);
+		auto dist_point = glm::distance(point, origin) * (fkt / abs(fkt));
+		auto dist_point2 = glm::distance(point2, origin) * (fkt2 / abs(fkt2));
 		//if the ray cuts both zy-planes at x-min and x-max or only one set t to the minimal positiv distance
 		//if no smaller positiv distance is set yet
 		if (s1 && s2) {
@@ -97,8 +97,8 @@ bool Box::intersect(Ray const& ray, float& t) const{
 		auto s1 = (point.x < max_.x && point.x > min_.x && point.z < max_.z && point.z > min_.z);
 		auto s2 = (point2.x < max_.x && point2.x > min_.y && point2.z < max_.z && point2.z > min_.z);
 		//calculates the distance between the intersection points and the ray origin
-		auto dist_point = glm::distance(point, origin);
-		auto dist_point2 = glm::distance(point2, origin);
+		auto dist_point = glm::distance(point, origin) * (fkt / abs(fkt));
+		auto dist_point2 = glm::distance(point2, origin) * (fkt2 / abs(fkt2));
 		//if the ray cuts both xz-planes at y-min and y-max  or only one set t to the minimal positiv distance
 		//if no smaller positiv distance is set yet
 		if (s1 && s2) {
