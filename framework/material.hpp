@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 struct Material {
-	Material(std::string name, Color ka, Color kd, Color ks, float m) : name(name), ka(ka), kd(kd), ks(ks), m(m) {};
+	Material(std::string const& name, Color ka, Color kd, Color ks, float m) : name(name), ka(ka), kd(kd), ks(ks), m(m) {};
 	std::string name;
 	Color ka;
 	Color kd;
@@ -12,7 +12,7 @@ struct Material {
 	float m;
 	friend std::ostream& operator<<(std::ostream& os, Material const& m)
 	{
-		os << "\n Name: " << m.name << " , Ka: " << m.ka << " , Kd: " << m.kd << " , Ks: " << m.ks << " , m: " << m.m << "\n";
+		os << "Name: " << m.name << ", Ka: " << m.ka << ", Kd: " << m.kd << ", Ks: " << m.ks << ", m: " << m.m << "\n";
 		return os;
 	}
 };

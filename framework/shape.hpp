@@ -4,11 +4,12 @@
 #include "ray.hpp"
 #include "material.hpp"
 #include <string>
+#include <memory>
 #include <iostream>
 
 class Shape {
 public:
-	Shape(std::string name, std::shared_ptr<Material> material);
+	Shape(std::string const& name, std::shared_ptr<Material> const& material);
 	~Shape();
 	virtual double area() const = 0;
 	virtual double volume() const = 0;

@@ -8,6 +8,7 @@
 #include "../framework/color.hpp"
 #include "../framework/shape.hpp"
 #include "../framework/scene.hpp" 
+#include "../framework/material.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -97,7 +98,7 @@ TEST_CASE("Box test") {
 
 TEST_CASE("Scene test") {
 	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-	readSDF_File("C:\\Users\\Mortiferum\\VisualStudioProjects\\Übung - 5\\programmiersprachen - raytracer\\Übung - 6\\Example.sdf");
+	readSDF_File("/home/philipp/Dokumente/Fs2/Programmiersprachen/Fork/programmiersprachen-raytracer/Ãœbung-6/Example.sdf");
 }
 
 TEST_CASE(" intersect_ray_sphere ")

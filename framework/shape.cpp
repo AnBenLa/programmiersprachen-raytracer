@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-Shape::Shape(std::string name, std::shared_ptr<Material> material) : name_{ name }, material_{ material } { std::cout << "Base constructor\n"; };
+Shape::Shape(std::string const& name, std::shared_ptr<Material> const& material) : name_{ name }, material_{ material } { std::cout << "Base constructor\n"; };
 
 Shape::~Shape() { std::cout << "Base destructor\n"; };
 
