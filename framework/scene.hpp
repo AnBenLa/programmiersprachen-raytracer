@@ -10,12 +10,12 @@
 
 struct Scene {
 
-	/*std::map<std::string, std::shared_ptr<Material>> mat_map;
-	std::set<std::string, std::shared_ptr<Material>> mat_set;
-	std::vector<std::shared_ptr<Material>> mat_vec;*/
+	std::map<std::string, std::shared_ptr<Material>> mat_map;
+	std::set<std::shared_ptr<Material>> mat_set;
+	std::vector<std::shared_ptr<Material>> mat_vec;
 };
 
-void readSDF_File(std::string const& path) {
+void readSDF_File(std::string const& path,Scene &scene) {
 
 	//opens ifstream, to read file
 	std::ifstream ifs(path);
@@ -54,8 +54,9 @@ void readSDF_File(std::string const& path) {
 				float m{std::stof(lineParts[12],NULL)};
 				std::shared_ptr<Material>mat = std::make_shared<Material>(lineParts[2],ka,kd,ks,m); 
 				std::cout<<*mat<<"\n";
-				//mat_vec.push_back(*mat);
-				//mat_map.push_back()
+				scene.mat_vec.push_back(mat);
+				scene.mat_map.insert(std::pair<std::string,std::shared_ptr<Material>>(mat->name,mat));
+				scene.mat_set.insert(mat);
 			}
 			catch(std::invalid_argument arg)
 			{	
@@ -75,4 +76,21 @@ void readSDF_File(std::string const& path) {
 		}
 	}
 };
+
+bool operator <(std::shared_ptr<Material> const& lhs, std::shared_ptr<Material>const& rhs)
+{
+	return lhs->name<rhs->name;
+}
+
+std::shared_ptr<Material> searchForMaterial(std::string name, Scene& scene){
+	
+	auto it = scene.mat_map.find(name);
+	if(it != scene.mat_map.end()){
+		return scene.mat_map.find(name)->second;
+	}	
+	else
+	{
+		return nullptr;
+	}
+}
 #endif

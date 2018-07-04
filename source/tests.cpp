@@ -98,7 +98,8 @@ TEST_CASE("Box test") {
 
 TEST_CASE("Scene test") {
 	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-	readSDF_File("/home/philipp/Dokumente/Fs2/Programmiersprachen/Fork/programmiersprachen-raytracer/Übung-6/Example.sdf");
+	readSDF_File("/home/philipp/Dokumente/Fs2/Programmiersprachen/Fork/programmiersprachen-raytracer/Übung-6/Example.sdf",*scene);
+	std::cout<<"Search result:"<<*searchForMaterial("red",*scene)<<"\n";
 }
 
 TEST_CASE(" intersect_ray_sphere ")
