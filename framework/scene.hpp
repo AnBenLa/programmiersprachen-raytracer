@@ -2,14 +2,21 @@
 #define SCENE_STRUCT
 #include <fstream>
 #include <iostream>
-#include "material.hpp"
 #include <vector>
 #include <set>
 #include <map>
 #include <string>
+#include "camera.hpp"
+#include "material.hpp"
+#include "light.hpp"
+#include "shape.hpp"
+#include "ambiente.hpp"
 
 struct Scene {
 	std::map<std::string, std::shared_ptr<Material>> mat_map;
+	std::vector<Shape> shapes_;
+	std::vector<Light> lights_;
+	Ambiente ambient_;
 };
 
 void readSDF_File(std::string const& path,Scene& scene) {

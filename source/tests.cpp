@@ -9,6 +9,7 @@
 #include "../framework/shape.hpp"
 #include "../framework/scene.hpp" 
 #include "../framework/material.hpp"
+#include "../framework/renderer.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -97,10 +98,14 @@ TEST_CASE("Box test") {
 }
 
 TEST_CASE("Scene test") {
-	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-	readSDF_File("/home/philipp/Dokumente/Fs2/Programmiersprachen/Fork/programmiersprachen-raytracer/Übung-6/Example.sdf",*scene);
-	std::cout<<"Search result:"<<*search_for_material("red",*scene)<<"\n";
-	REQUIRE(search_for_material("black",*scene)==nullptr);
+	SECTION("Read material files"){
+		std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+		readSDF_File("/home/anbenla/raytracer/programmiersprachen-raytracer/Übung-6/Example.sdf",*scene);
+		std::cout<<"Search result:"<<*search_for_material("red",*scene)<<"\n";
+		REQUIRE(search_for_material("black",*scene)==nullptr);
+	}
+	Renderer renderer(1920,1080,"test.ppm");
+	renderer.render();
 }
 
 TEST_CASE(" intersect_ray_sphere ")
