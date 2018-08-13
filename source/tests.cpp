@@ -98,14 +98,10 @@ TEST_CASE("Box test") {
 }
 
 TEST_CASE("Scene test") {
-	SECTION("Read material files"){
-		std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-		readSDF_File("/home/anbenla/raytracer/programmiersprachen-raytracer/Übung-6/Example.sdf",*scene);
-		std::cout<<"Search result:"<<*search_for_material("red",*scene)<<"\n";
-		REQUIRE(search_for_material("black",*scene)==nullptr);
-	}
-	Renderer renderer(1920,1080,"test.ppm");
-	renderer.render();
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+	readSDF_File("C:\\Simple-Scene.sdf",*scene);
+	std::cout<<"Search result:"<<*search_for_material("red",*scene)<<"\n";
+	REQUIRE(search_for_material("black",*scene)==nullptr);
 }
 
 TEST_CASE(" intersect_ray_sphere ")

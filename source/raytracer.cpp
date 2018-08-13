@@ -6,6 +6,8 @@
 #include <utility>
 #include <cmath>
 
+#include "../framework/scene.hpp" 
+
 int main(int argc, char* argv[])
 {
   unsigned const image_width = 800;
@@ -13,6 +15,9 @@ int main(int argc, char* argv[])
   std::string const filename = "./checkerboard.ppm";
 
   Renderer renderer{image_width, image_height, filename};
+
+  std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+  readSDF_File("C:\\Simple-Scene.sdf", *scene);
 
   //create separate thread to see updates of pixels while rendering
   std::thread render_thread([&renderer]() {renderer.render();});
