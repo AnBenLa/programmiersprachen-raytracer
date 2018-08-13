@@ -7,9 +7,9 @@
 #include <string>
 
 Box::Box(glm::vec3 min, glm::vec3 max, std::string name, std::shared_ptr<Material> material) :
-	Shape{ name, material }, min_{ min }, max_{ max } { std::cout << "Box constructor\n"; };
+	Shape{ name, material }, min_{ min }, max_{ max } {};
 
-Box::~Box() { std::cout << "Base destructor\n"; }
+Box::~Box() {}
 
 double Box::area() const{
 	double x = max_.x - min_.x;
@@ -26,7 +26,7 @@ double Box::volume() const{
 };
 
 std::ostream& Box::print(std::ostream& os) const {
-	return Shape::print(os) << "Shape form: Box\n";
+	return Shape::print(os) << "Min: (" << min_.x << ", " << min_.y << ", " << min_.z << "), Max: (" << max_.x << ", " << max_.y << ", " << max_.z << ")\n";
 };
 
 //Part of this method could be put in a helpher method, this would reduce code

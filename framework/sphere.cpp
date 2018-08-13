@@ -9,9 +9,9 @@
 #include "ray.hpp"
 
 Sphere::Sphere(glm::vec3 center, double radius, std::string name, std::shared_ptr<Material> material) :
-	Shape{name, material}, center_ { center }, radius_{ radius } { std::cout << "Sphere constructor\n"; };
+	Shape{name, material}, center_ { center }, radius_{ radius } {};
 
-Sphere::~Sphere() { std::cout << "Sphere destructor\n"; };
+Sphere::~Sphere() {};
 
 double Sphere::area() const{
 	return 4 * M_PI * pow(radius_,2);
@@ -22,7 +22,7 @@ double Sphere::volume() const{
 };
 
 std::ostream& Sphere::print(std::ostream& os) const {
-	return Shape::print(os) << "Shape form: Sphere\n";
+	return Shape::print(os) << "Center: (" << center_.x << ", " << center_.y << ", " << center_.z << "), Radius: (" << radius_ << ")\n";
 };
 
 //Worauf bezieht sich die Distance?
