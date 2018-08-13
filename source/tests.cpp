@@ -98,7 +98,7 @@ TEST_CASE("Box test") {
 
 TEST_CASE("Scene test") {
 	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-	readSDF_File("/home/anbenla/raytracer/programmiersprachen-raytracer/Übung-6/Example.sdf",*scene);
+	readSDF_File("C:\\Simple-Scene.sdf",*scene);
 	std::cout<<"Search result:"<<*search_for_material("red",*scene)<<"\n";
 	REQUIRE(search_for_material("black",*scene)==nullptr);
 }
