@@ -9,6 +9,7 @@
 #include "../framework/shape.hpp"
 #include "../framework/scene.hpp" 
 #include "../framework/material.hpp"
+#include "../framework/renderer.hpp"
 
 int main(int argc, char *argv[])
 {

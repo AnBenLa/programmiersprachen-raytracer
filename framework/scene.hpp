@@ -3,10 +3,12 @@
 #include <fstream>
 #include <iostream>
 #include "material.hpp"
+#include "shape.hpp"
 #include "box.hpp"
 #include "sphere.hpp"
-#include <vector>
-#include <set>
+#include "camera.hpp"
+#include "light.hpp"
+#include "ambiente.hpp"
 #include <map>
 #include <string>
 #include <sstream>

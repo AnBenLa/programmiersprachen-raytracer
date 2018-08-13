@@ -21,6 +21,9 @@ add_executable(tests
   ../framework/sphere.cpp
   ../framework/box.cpp
   ../framework/shape.cpp
+  ../framework/renderer.cpp
+  ../framework/ppmwriter.cpp
+  ../framework/pixel.cpp
    )
 target_link_libraries(tests
   ${GLFW_LIBRARIES}
