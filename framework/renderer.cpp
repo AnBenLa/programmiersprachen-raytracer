@@ -17,8 +17,9 @@ Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
   , ppm_(width_, height_)
 {}
 
-void Renderer::render()
+void Renderer::render(Scene const& scene)
 {
+
   std::size_t const checker_pattern_size = 20;
 
   for (unsigned y = 0; y < height_; ++y) {
@@ -26,7 +27,7 @@ void Renderer::render()
       Pixel p(x,y);
       //if ray from camera cuts object change pixel color
       if ( ((x/checker_pattern_size)%2) != ((y/checker_pattern_size)%2)) {
-        p.color = Color(0.0, 1.0, float(x)/height_);
+        p.color = Color(1.0, 1.0, float(x)/height_);
       } else {
         p.color = Color(1.0, 0.0, float(y)/width_);
       }
