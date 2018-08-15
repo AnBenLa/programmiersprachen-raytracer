@@ -25,9 +25,16 @@ std::ostream& Sphere::print(std::ostream& os) const {
 	return Shape::print(os) << "Center: (" << center_.x << ", " << center_.y << ", " << center_.z << "), Radius: (" << radius_ << ")\n";
 };
 
-//Worauf bezieht sich die Distance?
-bool Sphere::intersect(Ray const& ray, float& distance) const {
-	return glm::intersectRaySphere(ray.origin, ray.direction, center_, radius_ * radius_, distance);
+bool Sphere::intersect(Ray const& ray, float& distance, glm::vec3& cut_point, glm::vec3& normal) const {
+	bool status = glm::intersectRaySphere(ray.origin, ray.direction, center_, radius_, cut_point , normal);
+	distance = glm::length(cut_point);
+	return status;
+}
+
+Ray Sphere::reflect(glm::vec3 cut_point, Ray const& incoming_ray) const {
+	glm::vec3 normal_vec{};
+	Ray outcoming_ray{ cut_point, glm::reflect(incoming_ray.direction, normal_vec) };
+	return outcoming_ray;
 }
 
 glm::vec3 Sphere::center() const { return center_; };

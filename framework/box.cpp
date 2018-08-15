@@ -1,10 +1,15 @@
-#include "box.hpp"
 #include <glm/vec3.hpp>
 #include <glm/gtx/norm.hpp>
+#include <glm/gtx/intersect.hpp>
+#include <string>
+#include <vector>
+
 #include "shape.hpp"
 #include "color.hpp"
 #include "ray.hpp"
-#include <string>
+#include "plane.hpp"
+#include "box.hpp"
+
 
 Box::Box(glm::vec3 min, glm::vec3 max, std::string name, std::shared_ptr<Material> material) :
 	Shape{ name, material }, min_{ min }, max_{ max } {};
@@ -29,162 +34,94 @@ std::ostream& Box::print(std::ostream& os) const {
 	return Shape::print(os) << "Min: (" << min_.x << ", " << min_.y << ", " << min_.z << "), Max: (" << max_.x << ", " << max_.y << ", " << max_.z << ")\n";
 };
 
-//Part of this method could be put in a helpher method, this would reduce code
-bool Box::intersect(Ray const& ray, float& t) const{
+bool Box::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& normal) const{
+	
+	std::vector<glm::vec3> box_points{
+		//TODO find the closest point then check the 3 sides to that point for an intersection useing intersectRayPlane
+		glm::vec3{ min_.x,min_.y,min_.z },
+		glm::vec3{ min_.x,min_.y,max_.z },
+		glm::vec3{ max_.x,min_.y,min_.z },
+		glm::vec3{ min_.x,max_.y,min_.z },
+		glm::vec3{ max_.x,max_.y,max_.z },
+		glm::vec3{ max_.x,max_.y,min_.z },
+		glm::vec3{ min_.x,max_.y,max_.z },
+		glm::vec3{ max_.x,min_.y,max_.z },
+	};
+	
+	glm::vec3 closest_point = box_points.at(0);
+	float closest_dist = glm::length(box_points.at(0) - ray.origin);
 
-	auto origin = ray.origin;
-	auto direction = ray.direction;
-	bool intersect = false;
-	float smallest_pos = -1;
-
-	//Checks for the intersection point of the direction and the x-axis if it is inbetween the box borders
-	if (direction.x != 0) {
-		//calculates the factor by which the direction has to be multiplied to cut the yz-plane at x-min and x-max
-		auto fkt = (min_.x - origin.x) / direction.x;
-		auto fkt2 = (max_.x - origin.x) / direction.x;
-		//calculates the points where the direction multiplied with that factor hits the plane
-		auto point = origin + fkt * direction;
-		auto point2 = origin + fkt2 * direction;
-		//checks if the resulting points are within the box borders (inbetween the y and z values)
-		auto s1 = (point.y < max_.y && point.y > min_.y && point.z < max_.z && point.z > min_.z);
-		auto s2 = (point2.y < max_.y && point2.y > min_.y && point2.z < max_.z && point2.z > min_.z);
-		//calculates the distance between the intersection points and the ray origin
-		auto dist_point = glm::distance(point, origin) * (fkt / abs(fkt));
-		auto dist_point2 = glm::distance(point2, origin) * (fkt2 / abs(fkt2));
-		//if the ray cuts both zy-planes at x-min and x-max or only one set t to the minimal positiv distance
-		//if no smaller positiv distance is set yet
-		if (s1 && s2) {
-			if (dist_point < dist_point2) {
-				if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point;
-				}
-				else if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point2;
-				}
-			}
-			else {
-				if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point2;
-				}
-				else if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point;
-				}
-			}
-			intersect = true;
-		}
-		else if (s1) {
-			if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-				smallest_pos = dist_point;
-			}
-			intersect = true;
-		}
-		else if (s2) {
-			if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-				smallest_pos = dist_point2;
-			}
-			intersect = true;
+	for (glm::vec3 point : box_points) {
+		if (glm::length(point - ray.origin) < closest_dist) {
+			closest_point = point;
+			closest_dist = glm::length(point - ray.origin);
 		}
 	}
-	//Checks for the intersection point of the direction and the y-axis if it is inbetween the box borders
-	if (direction.y != 0) {
-		//calculates the factor by which the direction has to be multiplied to cut the xz-plane at y-min and y-max
-		auto fkt = (min_.y - origin.y) / direction.y;
-		auto fkt2 = (max_.y - origin.y) / direction.y;
-		//calculates the points where the direction multiplied with that factor hits the plane
-		auto point = origin + fkt * direction;
-		auto point2 = origin + fkt2 * direction;
-		//checks if the resulting points are within the box borders (inbetween the x and z values)
-		auto s1 = (point.x < max_.x && point.x > min_.x && point.z < max_.z && point.z > min_.z);
-		auto s2 = (point2.x < max_.x && point2.x > min_.y && point2.z < max_.z && point2.z > min_.z);
-		//calculates the distance between the intersection points and the ray origin
-		auto dist_point = glm::distance(point, origin) * (fkt / abs(fkt));
-		auto dist_point2 = glm::distance(point2, origin) * (fkt2 / abs(fkt2));
-		//if the ray cuts both xz-planes at y-min and y-max  or only one set t to the minimal positiv distance
-		//if no smaller positiv distance is set yet
-		if (s1 && s2) {
-			if (dist_point < dist_point2) {
-				if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point;
-				}
-				else if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point2;
-				}
-			}
-			else {
-				if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point2;
-				}
-				else if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point;
-				}
-			}
-			intersect = true;
-		}
-		else if (s1) {
-			if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-				smallest_pos = dist_point;
-			}
-			intersect = true;
-		}
-		else if (s2) {
-			if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-				smallest_pos = dist_point2;
-			}
-			intersect = true;
-		}
-	}
-	//Checks for the intersection point of the direction and the z-axis if it is inbetween the box borders
-	if (direction.z != 0) {
-		//calculates the factor by which the direction has to be multiplied to cut the yx-plane at z-min and z-max
-		auto fkt = (min_.z - origin.z) / direction.z;
-		auto fkt2 = (max_.z - origin.z) / direction.z;
-		//calculates the points where the direction multiplied with that factor hits the plane
-		auto point = origin + fkt * direction;
-		auto point2 = origin + fkt2 * direction;
-		//checks if the resulting points are within the box borders (inbetween the x and y values)
-		auto s1 = (point.y < max_.y && point.y > min_.y && point.x < max_.x && point.x > min_.x);
-		auto s2 = (point2.y < max_.y && point2.y > min_.y && point2.x < max_.x && point2.x > min_.x);
-		//calculates the distance between the intersection points and the ray origin
-		auto dist_point = glm::distance(point, origin) * (fkt / abs(fkt));
-		auto dist_point2 = glm::distance(point2, origin) * (fkt2 / abs(fkt2));
-		//if the ray cuts both yx-planes at z-min and z-max  or only one set t to the minimal positiv distance
-		//if no smaller positiv distance is set yet
-		if (s1 && s2) {
-			if (dist_point < dist_point2) {
-				if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point;
-				}
-				else if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point2;
-				}
-			}
-			else {
-				if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point2;
-				}
-				else if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-					smallest_pos = dist_point;
-				}
-			}
-			intersect = true;
-		}
-		else if (s1) {
-			if (dist_point > 0 && (dist_point < smallest_pos || smallest_pos < 0)) {
-				smallest_pos = dist_point;
-			}
-			intersect = true;
-		}
-		else if (s2) {
-			if (dist_point2 > 0 && (dist_point2 < smallest_pos || smallest_pos < 0)) {
-				smallest_pos = dist_point2;
-			}
-			intersect = true;
-		}
-	}
-	t = smallest_pos;
 
-	return intersect;
+	Plane plane1{ closest_point, glm::vec3{ 0,-1,0 }, glm::vec3{ 0,0,-1 } };
+	Plane plane2{ closest_point, glm::vec3{ 0,-1,0 }, glm::vec3{ -1,0,0 } };
+	Plane plane3{ closest_point, glm::vec3{ 0,0,-1 }, glm::vec3{ -1,0,0 } };
+
+	glm::vec3 normal1{ 1,0,0 };
+	glm::vec3 normal2{ 0,0,1 };
+	glm::vec3 normal3{ 0,1,0 };
+
+	float distance1;
+	float distance2;
+	float distance3;
+
+	bool inter1 = glm::intersectRayPlane(ray.origin, ray.direction, plane1.origin, normal1, distance1);
+	bool inter2 = glm::intersectRayPlane(ray.origin, ray.direction, plane2.origin, normal2, distance2);
+	bool inter3 = glm::intersectRayPlane(ray.origin, ray.direction, plane3.origin, normal3, distance3);
+
+	std::vector<glm::vec3> cut_points;
+	std::vector<glm::vec3> cut_normals;
+
+	if (inter1) {
+		cut_point = ray.origin + distance1 * ray.direction;
+		if (cut_point.y < max_.y && cut_point.y > min_.y && cut_point.z < max_.z && cut_point.z > min_.z) {
+			cut_points.push_back(cut_point);
+			cut_normals.push_back(normal1);
+		}
+	}
+	if (inter2){
+		cut_point = ray.origin + distance2 * ray.direction;
+		if (cut_point.y < max_.y && cut_point.y > min_.y && cut_point.x < max_.x && cut_point.x > min_.x) {
+			cut_points.push_back(cut_point);
+			cut_normals.push_back(normal2);
+		}
+	}
+	if (inter3) {
+		cut_point = ray.origin + distance3 * ray.direction;
+		if (cut_point.x < max_.x && cut_point.x > min_.x && cut_point.z < max_.z && cut_point.z > min_.z) {
+			cut_points.push_back(cut_point);
+			cut_normals.push_back(normal3);
+		}
+	}
+
+	if (cut_points.size() > 0) {
+		glm::vec3 closest_cut = cut_points.at(0);
+		glm::vec3 closest_normal = cut_normals.at(0);
+
+		for (auto it = 0; it < cut_points.size(); ++it) {
+			if (glm::length(cut_points.at(it)) < glm::length(closest_cut)) {
+				closest_cut = cut_points.at(it);
+				closest_normal = cut_normals.at(it);
+			}
+		}
+		t = glm::length(closest_cut - ray.origin);
+		cut_point = closest_cut;
+		normal = closest_normal;
+		return true;
+	}
+
+	return false;
 };
+
+Ray Box::reflect(glm::vec3 cut_point, Ray const& incoming_ray) const {
+	Ray outcoming_ray{};
+	return outcoming_ray;
+}
 
 glm::vec3 Box::min() const {
 	return min_;

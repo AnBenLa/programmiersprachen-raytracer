@@ -6,8 +6,9 @@ struct Camera{
     glm::vec3 position_;
     glm::vec3 direction_;
     unsigned int fov_;
+	glm::vec3 up_;
 
-	Camera(std::string name, glm::vec3 pos, glm::vec3 dir, unsigned int fov) : name_(name), position_(pos), direction_(dir), fov_(fov) {}
+	Camera(std::string name, glm::vec3 pos, glm::vec3 dir, unsigned int fov) : name_(name), position_(pos), direction_(dir), fov_(fov), up_(glm::vec3{1,0,0}) {}
 
 	friend std::ostream& operator<<(std::ostream& os, Camera const& c)
 	{

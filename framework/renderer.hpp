@@ -24,6 +24,7 @@ public:
 
   void render(Scene const& s);
   void write(Pixel const& p);
+  Color calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene);
 
   inline std::vector<Color> const& color_buffer() const
   {

@@ -12,7 +12,8 @@ public:
 	double area() const override;
 	double volume() const override;
 	std::ostream& print(std::ostream& os) const override;
-	bool intersect(Ray const&, float&) const override;
+	bool intersect(Ray const&, float&, glm::vec3&, glm::vec3&) const override;
+	Ray reflect(glm::vec3 cut_point, Ray const&) const override;
 	glm::vec3 center() const;
 	double radius() const;
 private:
