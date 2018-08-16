@@ -6,6 +6,6 @@ Programmiersprachen: Raytracer
 Framework for exercise 07.
 
 ToDo:
--> intersect box smallest distance anpassen
--> std::filread aufteilen (read/deserialized)
--> Diagramm (namen als atribute) und Abhängigkeit Scene-Material
+	- Tone Mapping
+	- Sphere besitzt komische schwarze Punkte
+	- Kamera muss angepasst werden

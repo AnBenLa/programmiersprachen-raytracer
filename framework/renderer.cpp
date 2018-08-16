@@ -23,7 +23,7 @@ Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
 void Renderer::render(Scene const& scene)
 {
 	double d = (width_/2)/tan(scene.camera_->fov_/2 * M_PI / 180);
-	
+
 	for (unsigned y = 0; y < height_; ++y) {
 		for (unsigned x = 0; x < width_; ++x) {
 			Pixel p(x,y);
@@ -55,7 +55,9 @@ void Renderer::render(Scene const& scene)
 			}
 			if (closest_shape != nullptr) {
 				//p.color = calculate_depth_map(closest_cut, scene, 300);
-				p.color = calculate_color(closest_shape, closest_cut, closest_normal, scene);
+				Color current_color = calculate_color(closest_shape, closest_cut, closest_normal, scene);
+				//tone mapping ???
+				p.color = current_color;
 			}
 			write(p);
 		}
