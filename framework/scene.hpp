@@ -19,6 +19,7 @@ struct Scene {
 	std::map<std::string, std::shared_ptr<Material>> mat_map_;
 	std::vector<std::shared_ptr<Shape>> shape_vec_;
 	std::vector<std::shared_ptr<Light>> light_vec_;
+	std::shared_ptr<Ambiente> ambiente_;
 	std::shared_ptr<Camera> camera_;
 };
 
@@ -123,7 +124,19 @@ static void deserializeObjects(Scene& scene, std::string line){
 			}
 		}
 	}
-
+	if (lineParts[0] == "ambient") {
+		std::cout << "Load ambient ...\n";
+		try {
+			Color color{ std::stof(lineParts[1],NULL),std::stof(lineParts[2],NULL),std::stof(lineParts[3],NULL) };
+			std::shared_ptr<Ambiente> am = std::make_shared<Ambiente>(color);
+			scene.ambiente_ = am;
+			std::cout << "Ambiente: " << *am << "\n";
+		}
+		catch (std::invalid_argument arg) {
+			std::cout << "Something went wrong, while loading the ambiente. Check format!\n";
+			std::cout << "Throws exception : " << arg.what() << "\n";
+		}
+	}
 }
 
 static void readSDF_File(std::string const& path,Scene& scene) {

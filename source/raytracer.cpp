@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
   readSDF_File("C:\\Simple-Scene.sdf", *scene);
   
-  unsigned const image_width = 1920;
-  unsigned const image_height = 1080;
+  unsigned const image_width = 480;
+  unsigned const image_height = 320;
   std::string const filename = "./checkerboard.ppm";
 
   Renderer renderer{ image_width, image_height, filename };

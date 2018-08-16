@@ -36,68 +36,70 @@ std::ostream& Box::print(std::ostream& os) const {
 
 bool Box::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& normal) const{
 	
-	std::vector<glm::vec3> box_points{
-		//TODO find the closest point then check the 3 sides to that point for an intersection useing intersectRayPlane
-		glm::vec3{ min_.x,min_.y,min_.z },
-		glm::vec3{ min_.x,min_.y,max_.z },
-		glm::vec3{ max_.x,min_.y,min_.z },
-		glm::vec3{ min_.x,max_.y,min_.z },
-		glm::vec3{ max_.x,max_.y,max_.z },
-		glm::vec3{ max_.x,max_.y,min_.z },
-		glm::vec3{ min_.x,max_.y,max_.z },
-		glm::vec3{ max_.x,min_.y,max_.z },
-	};
-	
-	glm::vec3 closest_point = box_points.at(0);
-	float closest_dist = glm::length(box_points.at(0) - ray.origin);
+	Plane plane1{ min_, glm::vec3 { 1,0,0 } };
+	Plane plane2{ min_, glm::vec3 { 0,0,1 } };
+	Plane plane3{ min_, glm::vec3 { 0,1,0 } };
+	Plane plane4{ max_, glm::vec3 { 1,0,0 } };
+	Plane plane5{ max_, glm::vec3 { 0,0,1 } };
+	Plane plane6{ max_, glm::vec3 { 0,1,0 } };
 
-	for (glm::vec3 point : box_points) {
-		if (glm::length(point - ray.origin) < closest_dist) {
-			closest_point = point;
-			closest_dist = glm::length(point - ray.origin);
-		}
-	}
+	//distance positiv oder negativ?
+	float distance1, distance2, distance3, distance4, distance5, distance6;
 
-	Plane plane1{ closest_point, glm::vec3{ 0,-1,0 }, glm::vec3{ 0,0,-1 } };
-	Plane plane2{ closest_point, glm::vec3{ 0,-1,0 }, glm::vec3{ -1,0,0 } };
-	Plane plane3{ closest_point, glm::vec3{ 0,0,-1 }, glm::vec3{ -1,0,0 } };
-
-	glm::vec3 normal1{ 1,0,0 };
-	glm::vec3 normal2{ 0,0,1 };
-	glm::vec3 normal3{ 0,1,0 };
-
-	float distance1;
-	float distance2;
-	float distance3;
-
-	bool inter1 = glm::intersectRayPlane(ray.origin, ray.direction, plane1.origin, normal1, distance1);
-	bool inter2 = glm::intersectRayPlane(ray.origin, ray.direction, plane2.origin, normal2, distance2);
-	bool inter3 = glm::intersectRayPlane(ray.origin, ray.direction, plane3.origin, normal3, distance3);
+	bool inter1 = glm::intersectRayPlane(ray.origin, ray.direction, plane1.origin, plane1.normal, distance1);
+	bool inter2 = glm::intersectRayPlane(ray.origin, ray.direction, plane2.origin, plane2.normal, distance2);
+	bool inter3 = glm::intersectRayPlane(ray.origin, ray.direction, plane3.origin, plane3.normal, distance3);
+	bool inter4 = glm::intersectRayPlane(ray.origin, ray.direction, plane4.origin, plane4.normal, distance4);
+	bool inter5 = glm::intersectRayPlane(ray.origin, ray.direction, plane5.origin, plane5.normal, distance5);
+	bool inter6 = glm::intersectRayPlane(ray.origin, ray.direction, plane6.origin, plane6.normal, distance6);
 
 	std::vector<glm::vec3> cut_points;
 	std::vector<glm::vec3> cut_normals;
 
-	if (inter1) {
+	if (inter1 && distance1 > 0) {
 		cut_point = ray.origin + distance1 * ray.direction;
 		if (cut_point.y < max_.y && cut_point.y > min_.y && cut_point.z < max_.z && cut_point.z > min_.z) {
 			cut_points.push_back(cut_point);
-			cut_normals.push_back(normal1);
+			cut_normals.push_back(plane1.normal);
 		}
 	}
-	if (inter2){
+	if (inter4 && distance4 > 0) {
+		cut_point = ray.origin + distance4 * ray.direction;
+		if (cut_point.y < max_.y && cut_point.y > min_.y && cut_point.z < max_.z && cut_point.z > min_.z) {
+			cut_points.push_back(cut_point);
+			cut_normals.push_back(plane4.normal);
+		}
+	}
+	if (inter2  && distance2 > 0){
 		cut_point = ray.origin + distance2 * ray.direction;
 		if (cut_point.y < max_.y && cut_point.y > min_.y && cut_point.x < max_.x && cut_point.x > min_.x) {
 			cut_points.push_back(cut_point);
-			cut_normals.push_back(normal2);
+			cut_normals.push_back(plane2.normal);
 		}
 	}
-	if (inter3) {
+	if (inter5 && distance5 > 0) {
+		cut_point = ray.origin + distance5 * ray.direction;
+		if (cut_point.y < max_.y && cut_point.y > min_.y && cut_point.x < max_.x && cut_point.x > min_.x) {
+			cut_points.push_back(cut_point);
+			cut_normals.push_back(plane5.normal);
+		}
+	}
+	if (inter3 && distance3 > 0) {
 		cut_point = ray.origin + distance3 * ray.direction;
 		if (cut_point.x < max_.x && cut_point.x > min_.x && cut_point.z < max_.z && cut_point.z > min_.z) {
 			cut_points.push_back(cut_point);
-			cut_normals.push_back(normal3);
+			cut_normals.push_back(plane3.normal);
 		}
 	}
+	if (inter6 && distance6 > 0) {
+		cut_point = ray.origin + distance6 * ray.direction;
+		if (cut_point.x < max_.x && cut_point.x > min_.x && cut_point.z < max_.z && cut_point.z > min_.z) {
+			cut_points.push_back(cut_point);
+			cut_normals.push_back(plane6.normal);
+		}
+	}
+
+	//behind or in front of camera!
 
 	if (cut_points.size() > 0) {
 		glm::vec3 closest_cut = cut_points.at(0);

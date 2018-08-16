@@ -9,6 +9,7 @@
 
 #define _USE_MATH_DEFINES
 #include "renderer.hpp"
+#include <glm/gtx/vector_angle.hpp>
 #include <math.h>
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
@@ -53,6 +54,7 @@ void Renderer::render(Scene const& scene)
 				}
 			}
 			if (closest_shape != nullptr) {
+				//p.color = calculate_depth_map(closest_cut, scene, 300);
 				p.color = calculate_color(closest_shape, closest_cut, closest_normal, scene);
 			}
 			write(p);
@@ -62,22 +64,54 @@ void Renderer::render(Scene const& scene)
 }
 
 Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
+	Color ambient = calculate_ambiente(shape, scene);
+	Color diffuse = calculate_diffuse(shape, cut, normal, scene);
+	Color specular = calculate_specular(shape, cut, normal, scene);
+	return  ambient + diffuse + specular;
+}
+
+//do you really have to multiply two colors?
+Color Renderer::calculate_ambiente(std::shared_ptr<Shape> shape, Scene const& scene) {
+	return scene.ambiente_->color_ * shape->material()->ka;
+}
+
+//not working yet. Sphere has to be checked!!!
+Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
 	Color color{ 0.0f, 0.0f, 0.0f };
 	for (std::shared_ptr<Light> light : scene.light_vec_) {
-		for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
-			float distance;
-			glm::vec3 cut_point;
-			glm::vec3 normal_new;
-			glm::vec3 vec_to_light = light->position_ - cut;
-			if (!shape_ptr->intersect(Ray{cut,vec_to_light}, distance, cut_point, normal_new)) {
-				float o = cos(glm::dot(glm::normalize(normal), glm::normalize(vec_to_light)));
-				float i_p = light->brightness_;
-				Color k_d = shape->material()->kd;
-				color += k_d*o*i_p;
+		bool can_see_light = true;
+		
+		glm::vec3 cut_point, normal_new;
+		glm::vec3 vec_to_light = glm::normalize(light->position_ - cut);
+		float distance;
+		
+		for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {	
+			bool cuts_shape = shape_ptr->intersect(Ray{ cut,vec_to_light }, distance, cut_point, normal_new);
+			if (cuts_shape) {
+				can_see_light = false;
 			}
+		}
+		if (can_see_light) {
+			float o = glm::dot(vec_to_light, glm::normalize(normal));
+			Color i_p = light->color_*light->brightness_;
+			Color k_d = shape->material()->kd;
+			color += k_d * o*i_p;
 		}
 	}
 	return color;
+}
+
+//not implemented yet
+Color Renderer::calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
+	Color color{ 0.0f, 0.0f, 0.0f };
+	return color;
+}
+
+//to check if the intersect methods work...
+Color Renderer::calculate_depth_map(glm::vec3 const& cut, Scene const& scene, float const& max_dist) {
+	Color color{ 1.0f, 1.0f, 1.0f };
+	float value = glm::length(cut - scene.camera_->position_) / max_dist;
+	return Color{ 1.0f, 1.0f, 1.0f } - color*value;
 }
 
 void Renderer::write(Pixel const& p)

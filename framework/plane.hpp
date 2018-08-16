@@ -4,7 +4,6 @@
 struct Plane
 {
 	glm::vec3 origin;
-	glm::vec3 direction1;
-	glm::vec3 direction2;
+	glm::vec3 normal;
 };
 #endif
