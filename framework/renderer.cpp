@@ -11,6 +11,8 @@
 #include "renderer.hpp"
 #include <glm/gtx/vector_angle.hpp>
 #include <math.h>
+#include <string>
+#include <chrono>
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
   : width_(w)
@@ -20,49 +22,63 @@ Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
   , ppm_(width_, height_)
 {}
 
-void Renderer::render(Scene const& scene)
+void Renderer::render(Scene const& scene, int frames)
 {
-	double d = (width_/2)/tan(scene.camera_->fov_/2 * M_PI / 180);
-
-	for (unsigned y = 0; y < height_; ++y) {
-		for (unsigned x = 0; x < width_; ++x) {
-			Pixel p(x,y);
-			p.color = Color(0.0, 0.0, float(y) / width_);
-			float min_distance = 0.0f;
-			std::shared_ptr<Shape> closest_shape = nullptr;
-			glm::vec3 closest_cut{};
-			glm::vec3 closest_normal{};
-
-			for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
-				float distance = 0.0f;
-				glm::vec3 cut_point{};
-				glm::vec3 normal{};
-				glm::vec3 pos = scene.camera_->position_;
-				glm::vec3 dir = scene.camera_->direction_;
-
-				//TODO needs to be changed because something with the direction is off
-				dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
-				Ray ray{ pos , glm::normalize(dir) };
+	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
+	double frame_times = 0;
+	for (int i = 0; i < frames;++i) {
+		//scene.camera_->position_ = glm::vec3{i-100,i-100,0};
+		auto start = std::chrono::high_resolution_clock::now();
+	
+		for (unsigned y = 0; y < height_; ++y) {
+			for (unsigned x = 0; x < width_; ++x) {
 				
-				if ((*shape_ptr).intersect(ray, distance, cut_point, normal)) {
-					if (distance < min_distance || (min_distance == 0.0f && closest_shape == nullptr)) {
-						min_distance = distance;
-						closest_shape = shape_ptr;
-						closest_cut = cut_point;
-						closest_normal = normal;
+				Pixel p(x, y);
+				p.color = Color(0.0, 0.0, float(y) / width_);
+				
+				float min_distance = 0.0f;
+				std::shared_ptr<Shape> closest_shape = nullptr;
+				glm::vec3 closest_cut{};
+				glm::vec3 closest_normal{};
+
+				for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
+					float distance = 0.0f;
+					glm::vec3 cut_point{};
+					glm::vec3 normal{};
+					glm::vec3 pos = scene.camera_->position_;
+					glm::vec3 dir = scene.camera_->direction_;
+
+					//TODO needs to be changed because something with the direction is off
+					dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
+					Ray ray{ pos , glm::normalize(dir) };
+
+					if ((*shape_ptr).intersect(ray, distance, cut_point, normal)) {
+						if (distance < min_distance || (min_distance == 0.0f && closest_shape == nullptr)) {
+							min_distance = distance;
+							closest_shape = shape_ptr;
+							closest_cut = cut_point;
+							closest_normal = normal;
+						}
 					}
 				}
+				if (closest_shape != nullptr) {
+					//p.color = calculate_depth_map(closest_cut, scene, 300);
+					Color current_color = calculate_color(closest_shape, closest_cut, closest_normal, scene);
+					//tone mapping ???
+					p.color = current_color;
+				}
+				write(p);
 			}
-			if (closest_shape != nullptr) {
-				//p.color = calculate_depth_map(closest_cut, scene, 300);
-				Color current_color = calculate_color(closest_shape, closest_cut, closest_normal, scene);
-				//tone mapping ???
-				p.color = current_color;
-			}
-			write(p);
 		}
+		auto finish = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> elapsed = finish - start;
+		double elapsed_s = elapsed.count();
+		std::cout << "Frame rendered: "<< ((float)i+1)/(float)frames*100 <<"%, \t";
+		std::cout << "Elapsed time: " << elapsed_s << " s   \t, remaining time: " << (frames - i)*elapsed_s << "s\n";
+		frame_times += elapsed_s;
+		ppm_.save(filename_ + "_" + std::to_string(i) + ".ppm");
 	}
-	ppm_.save(filename_);
+		std::cout << "Rendertime total: " << frame_times << ", Rendertime per Frame: " << frame_times / frames;
 }
 
 Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
@@ -91,13 +107,14 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 			bool cuts_shape = shape_ptr->intersect(Ray{ cut,vec_to_light }, distance, cut_point, normal_new);
 			if (cuts_shape) {
 				can_see_light = false;
+				break;
 			}
 		}
 		if (can_see_light) {
 			float o = glm::dot(vec_to_light, glm::normalize(normal));
 			Color i_p = light->color_*light->brightness_;
 			Color k_d = shape->material()->kd;
-			color += k_d * o*i_p;
+			color += k_d *o*i_p;
 		}
 	}
 	return color;

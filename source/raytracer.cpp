@@ -15,11 +15,11 @@ int main(int argc, char* argv[])
   
   unsigned const image_width = 480;
   unsigned const image_height = 320;
-  std::string const filename = "./checkerboard.ppm";
+  std::string const filename = "./checkerboard";
 
   Renderer renderer{ image_width, image_height, filename };
 
-  renderer.render(*scene);
+  renderer.render(*scene, 1);
   //create separate thread to see updates of pixels while rendering
   //std::thread render_thread([&renderer, scene]() {renderer.render(*scene);});
 

@@ -22,7 +22,7 @@ class Renderer
 public:
   Renderer(unsigned w, unsigned h, std::string const& file);
 
-  void render(Scene const& s);
+  void render(Scene const& s, int frames);
   void write(Pixel const& p);
   Color calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene);
   Color calculate_ambiente(std::shared_ptr<Shape> shape, Scene const& scene);
