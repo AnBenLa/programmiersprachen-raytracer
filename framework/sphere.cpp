@@ -26,8 +26,8 @@ std::ostream& Sphere::print(std::ostream& os) const {
 };
 
 bool Sphere::intersect(Ray const& ray, float& distance, glm::vec3& cut_point, glm::vec3& normal) const {
-	bool status = glm::intersectRaySphere(ray.origin, ray.direction, center_, radius_, cut_point , normal);
-	distance = glm::length(cut_point);
+	bool status = glm::intersectRaySphere(ray.origin, glm::normalize(ray.direction), center_, radius_, cut_point , normal);
+	distance = glm::length(cut_point - ray.origin);
 	return status;
 }
 

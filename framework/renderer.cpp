@@ -27,7 +27,7 @@ void Renderer::render(Scene const& scene, int frames)
 	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
 	double frame_times = 0;
 	for (int i = 0; i < frames;++i) {
-		//scene.camera_->position_ = glm::vec3{i-100,i-100,0};
+		scene.camera_->position_ = glm::vec3{-100 + i,0,0};
 		auto start = std::chrono::high_resolution_clock::now();
 	
 		for (unsigned y = 0; y < height_; ++y) {
@@ -46,9 +46,8 @@ void Renderer::render(Scene const& scene, int frames)
 					glm::vec3 cut_point{};
 					glm::vec3 normal{};
 					glm::vec3 pos = scene.camera_->position_;
-					glm::vec3 dir = scene.camera_->direction_;
+					glm::vec3 dir = glm::normalize(scene.camera_->direction_);
 
-					//TODO needs to be changed because something with the direction is off
 					dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
 					Ray ray{ pos , glm::normalize(dir) };
 
@@ -74,7 +73,7 @@ void Renderer::render(Scene const& scene, int frames)
 		std::chrono::duration<double> elapsed = finish - start;
 		double elapsed_s = elapsed.count();
 		std::cout << "Frame rendered: "<< ((float)i+1)/(float)frames*100 <<"%, \t";
-		std::cout << "Elapsed time: " << elapsed_s << " s   \t, remaining time: " << (frames - i)*elapsed_s << "s\n";
+		std::cout << "Elapsed time: " << elapsed_s << " s    \t, remaining time: " << (frames - i)*elapsed_s << "s\n";
 		frame_times += elapsed_s;
 		ppm_.save(filename_ + "_" + std::to_string(i) + ".ppm");
 	}
@@ -85,7 +84,7 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	Color ambient = calculate_ambiente(shape, scene);
 	Color diffuse = calculate_diffuse(shape, cut, normal, scene);
 	Color specular = calculate_specular(shape, cut, normal, scene);
-	return  ambient + diffuse + specular;
+	return  ambient + diffuse +specular;
 }
 
 //do you really have to multiply two colors?
@@ -103,6 +102,7 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 		glm::vec3 vec_to_light = glm::normalize(light->position_ - cut);
 		float distance;
 		
+		//due to small calculation errors some points are within the shape and not on the shape! Needs to be fixed!
 		for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {	
 			bool cuts_shape = shape_ptr->intersect(Ray{ cut,vec_to_light }, distance, cut_point, normal_new);
 			if (cuts_shape) {
@@ -114,7 +114,7 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 			float o = glm::dot(vec_to_light, glm::normalize(normal));
 			Color i_p = light->color_*light->brightness_;
 			Color k_d = shape->material()->kd;
-			color += k_d *o*i_p;
+			color += k_d * o *i_p;
 		}
 	}
 	return color;
