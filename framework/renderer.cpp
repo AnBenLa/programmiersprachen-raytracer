@@ -27,7 +27,8 @@ void Renderer::render(Scene const& scene, int frames)
 	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
 	double frame_times = 0;
 	for (int i = 0; i < frames;++i) {
-		scene.camera_->position_ = glm::vec3{-100 + i,0,0};
+		scene.camera_->position_ = glm::vec3{0,0,0};
+		//scene.light_vec_.at(0)->position_ = glm::vec3{ i*6 - 500,800,0 };
 		auto start = std::chrono::high_resolution_clock::now();
 	
 		for (unsigned y = 0; y < height_; ++y) {
@@ -94,7 +95,8 @@ Color Renderer::calculate_ambiente(std::shared_ptr<Shape> shape, Scene const& sc
 
 //not working yet. Sphere has to be checked!!!
 Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
-	Color color{ 0.0f, 0.0f, 0.0f };
+	Color comb_clr{ 0,0,0 };
+	std::vector<Color> light_colors{};
 	for (std::shared_ptr<Light> light : scene.light_vec_) {
 		bool can_see_light = true;
 		
@@ -102,10 +104,19 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 		glm::vec3 vec_to_light = glm::normalize(light->position_ - cut);
 		float distance;
 		
+		float distance_test;
+		
+		shape->intersect(Ray{ cut, normal }, distance_test, cut_point, normal_new);
+		bool cut_inside_shape = false;
+		
+		if (distance_test > 0 && distance_test < 0.1) {
+			cut_inside_shape = true;
+		}
+
 		//due to small calculation errors some points are within the shape and not on the shape! Needs to be fixed!
-		for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {	
+		for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
 			bool cuts_shape = shape_ptr->intersect(Ray{ cut,vec_to_light }, distance, cut_point, normal_new);
-			if (cuts_shape) {
+			if (cuts_shape && glm::length(cut - cut_point) > 1) {
 				can_see_light = false;
 				break;
 			}
@@ -114,10 +125,26 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 			float o = glm::dot(vec_to_light, glm::normalize(normal));
 			Color i_p = light->color_*light->brightness_;
 			Color k_d = shape->material()->kd;
-			color += k_d * o *i_p;
+			light_colors.push_back(k_d * o *i_p);
 		}
 	}
-	return color;
+
+	for (int i = 0; i < light_colors.size(); ++i) {
+		Color clr = light_colors.at(i);
+		/*
+		if (clr.r < 0) {
+			clr.r = 0;
+		}
+		if (clr.g < 0) {
+			clr.g = 0;
+		}
+		if (clr.b < 0) {
+			clr.b = 0;
+		}
+		*/
+		comb_clr += clr;
+	}
+	return comb_clr;
 }
 
 //not implemented yet
