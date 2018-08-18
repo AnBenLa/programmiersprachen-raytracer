@@ -27,8 +27,8 @@ void Renderer::render(Scene const& scene, int frames)
 	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
 	double frame_times = 0;
 	for (int i = 0; i < frames;++i) {
-		scene.camera_->position_ = glm::vec3{0,0,0};
-		//scene.light_vec_.at(0)->position_ = glm::vec3{ i*6 - 500,800,0 };
+		//scene.camera_->position_ = glm::vec3{0, 0 ,-200 + i};
+		scene.light_vec_.at(0)->position_ = glm::vec3{ 500,800,i*6 };
 		auto start = std::chrono::high_resolution_clock::now();
 	
 		for (unsigned y = 0; y < height_; ++y) {
@@ -73,8 +73,8 @@ void Renderer::render(Scene const& scene, int frames)
 		auto finish = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = finish - start;
 		double elapsed_s = elapsed.count();
-		std::cout << "Frame rendered: "<< ((float)i+1)/(float)frames*100 <<"%, \t";
-		std::cout << "Elapsed time: " << elapsed_s << " s    \t, remaining time: " << (frames - i)*elapsed_s << "s\n";
+		std::cout << "Frame rendered: "<< ((float)i+1)/(float)frames*100 <<"% \t";
+		std::cout << ", Elapsed time: " << elapsed_s << " s    \t, remaining time: " << (frames - i)*elapsed_s << "s\n";
 		frame_times += elapsed_s;
 		ppm_.save(filename_ + "_" + std::to_string(i) + ".ppm");
 	}
@@ -85,7 +85,7 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	Color ambient = calculate_ambiente(shape, scene);
 	Color diffuse = calculate_diffuse(shape, cut, normal, scene);
 	Color specular = calculate_specular(shape, cut, normal, scene);
-	return  ambient + diffuse +specular;
+	return  ambient + diffuse + specular;
 }
 
 //do you really have to multiply two colors?
@@ -93,7 +93,7 @@ Color Renderer::calculate_ambiente(std::shared_ptr<Shape> shape, Scene const& sc
 	return scene.ambiente_->color_ * shape->material()->ka;
 }
 
-//not working yet. Sphere has to be checked!!!
+//seems to be working!!!
 Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
 	Color comb_clr{ 0,0,0 };
 	std::vector<Color> light_colors{};
@@ -103,20 +103,11 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 		glm::vec3 cut_point, normal_new;
 		glm::vec3 vec_to_light = glm::normalize(light->position_ - cut);
 		float distance;
-		
-		float distance_test;
-		
-		shape->intersect(Ray{ cut, normal }, distance_test, cut_point, normal_new);
-		bool cut_inside_shape = false;
-		
-		if (distance_test > 0 && distance_test < 0.1) {
-			cut_inside_shape = true;
-		}
 
-		//due to small calculation errors some points are within the shape and not on the shape! Needs to be fixed!
 		for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
-			bool cuts_shape = shape_ptr->intersect(Ray{ cut,vec_to_light }, distance, cut_point, normal_new);
-			if (cuts_shape && glm::length(cut - cut_point) > 1) {
+			//the cut can be inside the shape so a point outside the shape is calculated by cut + 0.1f*normal
+			bool cuts_shape = shape_ptr->intersect(Ray{ cut + 0.1f*normal,vec_to_light }, distance, cut_point, normal_new);
+			if (cuts_shape) {
 				can_see_light = false;
 				break;
 			}
@@ -131,26 +122,47 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 
 	for (int i = 0; i < light_colors.size(); ++i) {
 		Color clr = light_colors.at(i);
-		/*
-		if (clr.r < 0) {
-			clr.r = 0;
-		}
-		if (clr.g < 0) {
-			clr.g = 0;
-		}
-		if (clr.b < 0) {
-			clr.b = 0;
-		}
-		*/
 		comb_clr += clr;
 	}
 	return comb_clr;
 }
 
-//not implemented yet
+//not completely working yet
 Color Renderer::calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
-	Color color{ 0.0f, 0.0f, 0.0f };
-	return color;
+	Color comb_clr{ 0,0,0 };
+	std::vector<Color> light_colors{};
+	for (std::shared_ptr<Light> light : scene.light_vec_) {
+		bool can_see_light = true;
+
+		glm::vec3 cut_point, normal_new;
+		glm::vec3 vec_to_light = glm::normalize(light->position_ - cut);
+		float distance;
+
+		for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
+			//the cut can be inside the shape so a point outside the shape is calculated by cut + 0.1f*normal
+			bool cuts_shape = shape_ptr->intersect(Ray{ cut + 0.5f*normal,vec_to_light }, distance, cut_point, normal_new);
+			if (cuts_shape) {
+				can_see_light = false;
+				break;
+			}
+		}
+		if (can_see_light) {
+			float m = shape->material()->m;
+			glm::vec3 v = glm::normalize(scene.camera_->position_ - cut);
+			glm::vec3 r = glm::dot(normal,vec_to_light)*2.0f*normal-vec_to_light;
+			float cos = pow(glm::dot(r,v), m);
+			float m_pi = (m + 2) / (2 * M_PI);
+			Color i_p = light->color_*light->brightness_;
+			Color k_s = shape->material()->ks;
+			light_colors.push_back(k_s * m_pi *cos *i_p);
+		}
+	}
+
+	for (int i = 0; i < light_colors.size(); ++i) {
+		Color clr = light_colors.at(i);
+		comb_clr += clr;
+	}
+	return comb_clr;
 }
 
 //to check if the intersect methods work...

@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
   Renderer renderer{ image_width, image_height, filename };
 
-  renderer.render(*scene, 1);
+  renderer.render(*scene, 200);
   //create separate thread to see updates of pixels while rendering
   //std::thread render_thread([&renderer, scene]() {renderer.render(*scene);});
 
