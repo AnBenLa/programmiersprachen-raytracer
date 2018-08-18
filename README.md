@@ -7,5 +7,4 @@ Framework for exercise 07.
 
 ToDo:
 	- Tone Mapping
-	- Sphere besitzt komische schwarze Punkte
 	- Kamera muss angepasst werden
