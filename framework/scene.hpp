@@ -42,7 +42,13 @@ static void deserializeObjects(Scene& scene, std::string line){
 				Color kd{ std::stof(lineParts[6],NULL),std::stof(lineParts[7],NULL),std::stof(lineParts[8],NULL) };
 				Color ks{ std::stof(lineParts[9],NULL),std::stof(lineParts[10],NULL),std::stof(lineParts[11],NULL) };
 				float m{ std::stof(lineParts[12],NULL) };
-				std::shared_ptr<Material>mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m);
+				std::shared_ptr<Material>mat;
+				if (lineParts.size() == 13) {
+					mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m);
+				} else {
+					float glossy = std::stof(lineParts[13], NULL);
+					mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m,glossy);
+				}
 				std::cout << "Material: " << *mat << "\n";
 				scene.mat_map_.insert(std::pair<std::string, std::shared_ptr<Material>>(mat->name, mat));
 			}

@@ -107,7 +107,7 @@ bool Box::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& n
 		glm::vec3 closest_normal = cut_normals.at(0);
 
 		for (auto it = 0; it < cut_points.size(); ++it) {
-			if (glm::length(cut_points.at(it)) < glm::length(closest_cut)) {
+			if (glm::length(cut_points.at(it) - ray.origin) < glm::length(closest_cut - ray.origin)) {
 				closest_cut = cut_points.at(it);
 				closest_normal = cut_normals.at(it);
 			}

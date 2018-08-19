@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 	//TODO Die zu berechnenden Strahlen müssen korrekt berechnet werden.
 	// Die Box intersect Methode muss überprüft werden...
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-  readSDF_File("C:\\Simple-Scene.sdf", *scene);
+  readSDF_File("C:\\Test.sdf", *scene);
   
   unsigned const image_width = 480;
   unsigned const image_height = 320;

@@ -27,43 +27,36 @@ void Renderer::render(Scene const& scene, int frames)
 	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
 	double frame_times = 0;
 	for (int i = 0; i < frames;++i) {
-		//scene.camera_->position_ = glm::vec3{0, 0 ,-200 + i};
+		scene.camera_->position_ = glm::vec3{- 100 + i, 0 , 100 - i/2.0f};
 		scene.light_vec_.at(0)->position_ = glm::vec3{ 500,800,i*6 };
 		auto start = std::chrono::high_resolution_clock::now();
 	
 		for (unsigned y = 0; y < height_; ++y) {
+			if (y == height_ / 4) {
+				std::cout << "25% - ";
+			} else if (y == height_ / 2) {
+				std::cout << "50% - ";
+			} else if (y == (3 * height_) / 4) {
+				std::wcout << "75%\n";
+			}
 			for (unsigned x = 0; x < width_; ++x) {
 				
 				Pixel p(x, y);
-				p.color = Color(0.0, 0.0, float(y) / width_);
+				p.color = Color(0.2314, 0.5137, 0.7412);
 				
-				float min_distance = 0.0f;
-				std::shared_ptr<Shape> closest_shape = nullptr;
-				glm::vec3 closest_cut{};
-				glm::vec3 closest_normal{};
+				//generate the camera ray
+				glm::vec3 pos = scene.camera_->position_;
+				glm::vec3 dir = glm::normalize(scene.camera_->direction_);
+				dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
+				Ray ray{ pos , glm::normalize(dir) };
+				
+				//calculate the first shape that gets hit
+				Hit hit = get_closest_hit(scene, ray);
 
-				for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
-					float distance = 0.0f;
-					glm::vec3 cut_point{};
-					glm::vec3 normal{};
-					glm::vec3 pos = scene.camera_->position_;
-					glm::vec3 dir = glm::normalize(scene.camera_->direction_);
-
-					dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
-					Ray ray{ pos , glm::normalize(dir) };
-
-					if ((*shape_ptr).intersect(ray, distance, cut_point, normal)) {
-						if (distance < min_distance || (min_distance == 0.0f && closest_shape == nullptr)) {
-							min_distance = distance;
-							closest_shape = shape_ptr;
-							closest_cut = cut_point;
-							closest_normal = normal;
-						}
-					}
-				}
-				if (closest_shape != nullptr) {
-					//p.color = calculate_depth_map(closest_cut, scene, 300);
-					Color current_color = calculate_color(closest_shape, closest_cut, closest_normal, scene);
+				//if a shape is hit the pixel color is computed
+				if (hit.shape_ != nullptr) {
+					//Color current_color = calculate_depth_map(closest_cut, scene, 600);
+					Color current_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, ray);
 					//tone mapping ???
 					p.color = current_color;
 				}
@@ -81,11 +74,56 @@ void Renderer::render(Scene const& scene, int frames)
 		std::cout << "Rendertime total: " << frame_times << ", Rendertime per Frame: " << frame_times / frames;
 }
 
-Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
+Hit Renderer::get_closest_hit(Scene const& scene, Ray const& ray) {
+	float min_distance = 0.0f;
+	std::shared_ptr<Shape> closest_shape = nullptr;
+	glm::vec3 closest_cut{};
+	glm::vec3 closest_normal{};
+
+	for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
+		float distance = 0.0f;
+		glm::vec3 cut_point{};
+		glm::vec3 normal{};
+
+		if ((*shape_ptr).intersect(ray, distance, cut_point, normal)) {
+			if (distance < min_distance || (min_distance == 0.0f && closest_shape == nullptr)) {
+				min_distance = distance;
+				closest_shape = shape_ptr;
+				closest_cut = cut_point;
+				closest_normal = normal;
+			}
+		}
+	}
+	return Hit{ray.direction, closest_cut, closest_normal, closest_shape};
+}
+
+Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray) {
+	Color final_value{ 0.0f,0.0f,0.0f };
 	Color ambient = calculate_ambiente(shape, scene);
 	Color diffuse = calculate_diffuse(shape, cut, normal, scene);
 	Color specular = calculate_specular(shape, cut, normal, scene);
-	return  ambient + diffuse + specular;
+	//Color diffuse = calculate_depth_map(cut, scene, 600);
+	Color phong = ambient + diffuse;
+	if (shape->material()->glossy > 0) {
+		Color reflection = calculate_reflection(shape, cut, normal, scene, ray);
+		final_value = phong * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
+	}else {
+		final_value = phong + specular;
+	}
+	return  final_value;
+}
+
+//not implemented yet
+Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray){
+	glm::vec3 reflection_vec = glm::reflect(glm::normalize(ray.direction), glm::normalize(normal));
+	Ray new_ray{ cut + 0.1f*normal, glm::normalize(reflection_vec) };
+	Hit hit = get_closest_hit(scene, new_ray);
+	if (hit.shape_ == nullptr) {
+		return { 0.0f, 0.0f, 0.0f };
+	} else {
+		Color reflected_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, new_ray);
+		return reflected_color;
+	}
 }
 
 //do you really have to multiply two colors?
@@ -127,7 +165,7 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 	return comb_clr;
 }
 
-//not completely working yet
+//seems to be working!!!
 Color Renderer::calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
 	Color comb_clr{ 0,0,0 };
 	std::vector<Color> light_colors{};

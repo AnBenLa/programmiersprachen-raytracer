@@ -4,15 +4,17 @@
 #include <iostream>
 #include <string>
 struct Material {
-	Material(std::string const& name, Color ka, Color kd, Color ks, float m) : name(name), ka(ka), kd(kd), ks(ks), m(m) {};
+	Material(std::string const& name, Color ka, Color kd, Color ks, float m) : name(name), ka(ka), kd(kd), ks(ks), m(m), glossy(0) {};
+	Material(std::string const& name, Color ka, Color kd, Color ks, float m, float glossy) : name(name), ka(ka), kd(kd), ks(ks), m(m), glossy(glossy) {};
 	std::string name;
 	Color ka;
 	Color kd;
 	Color ks;
 	float m;
+	float glossy;
 	friend std::ostream& operator<<(std::ostream& os, Material const& m)
 	{
-		os << "Name: " << m.name << ", Ka: " << m.ka << ", Kd: " << m.kd << ", Ks: " << m.ks << ", m: " << m.m << "\n";
+		os << "Name: " << m.name << ", Ka: " << m.ka << ", Kd: " << m.kd << ", Ks: " << m.ks << ", m: " << m.m << ", glossy: " << m.glossy <<"\n";
 		return os;
 	}
 };
