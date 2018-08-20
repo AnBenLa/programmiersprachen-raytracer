@@ -13,13 +13,13 @@ int main(int argc, char* argv[])
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
   readSDF_File("C:\\Test.sdf", *scene);
   
-  unsigned const image_width = 480;
-  unsigned const image_height = 320;
+  unsigned const image_width = 480/2;
+  unsigned const image_height = 320/2 ;
   std::string const filename = "./checkerboard";
 
   Renderer renderer{ image_width, image_height, filename };
 
-  renderer.render(*scene, 200);
+  renderer.render(*scene, 1);
   //create separate thread to see updates of pixels while rendering
   //std::thread render_thread([&renderer, scene]() {renderer.render(*scene);});
 

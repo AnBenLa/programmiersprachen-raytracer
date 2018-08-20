@@ -13,7 +13,6 @@ public:
 	double volume() const override;
 	std::ostream& print(std::ostream& os) const override;
 	bool intersect(Ray const&, float& r, glm::vec3&, glm::vec3&) const override;
-	Ray reflect(glm::vec3 cut_point, Ray const&) const override;
 	glm::vec3 min() const;
 	glm::vec3 max() const;
 private:

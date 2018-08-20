@@ -5,6 +5,7 @@
 #include "material.hpp"
 #include "light.hpp"
 #include <string>
+#include <glm/glm.hpp>
 #include <memory>
 #include <iostream>
 #include <tuple>
@@ -17,12 +18,13 @@ public:
 	virtual double volume() const = 0;
 	virtual std::ostream& print(std::ostream& os) const;
 	virtual bool intersect(Ray const& incoming_ray, float& distance, glm::vec3& cut_point, glm::vec3& normal_vec) const = 0;
-	virtual Ray reflect(glm::vec3 cut_point, Ray const&) const = 0;
 	std::string name() const;
 	std::shared_ptr<Material> material() const;
 private:
 	std::string name_;
 	std::shared_ptr<Material> material_;
+	glm::mat4 world_transformation_;
+	glm::mat4 world_transformation_inv_;
 };
 
 std::ostream& operator <<(std::ostream& os, Shape const& s);

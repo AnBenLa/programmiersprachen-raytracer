@@ -31,12 +31,6 @@ bool Sphere::intersect(Ray const& ray, float& distance, glm::vec3& cut_point, gl
 	return status;
 }
 
-Ray Sphere::reflect(glm::vec3 cut_point, Ray const& incoming_ray) const {
-	glm::vec3 normal_vec{};
-	Ray outcoming_ray{ cut_point, glm::reflect(incoming_ray.direction, normal_vec) };
-	return outcoming_ray;
-}
-
 glm::vec3 Sphere::center() const { return center_; };
 
 double Sphere::radius() const { return radius_; };

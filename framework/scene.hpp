@@ -11,6 +11,7 @@
 #include "shape.hpp"
 #include "box.hpp"
 #include "sphere.hpp"
+#include "triangle.hpp"
 #include "camera.hpp"
 #include "light.hpp"
 #include "ambiente.hpp"
@@ -90,6 +91,23 @@ static void deserializeObjects(Scene& scene, std::string line){
 				catch (std::invalid_argument arg)
 				{
 					std::cout << "Something went wrong, while loading the sphere. Check format!\n";
+					std::cout << "Throws exception : " << arg.what() << "\n";
+				}
+			}
+			if (lineParts[2] == "triangle") {
+				try {
+					std::string name = lineParts[3];
+					glm::vec3 a = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
+					glm::vec3 b = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
+					glm::vec3 c = glm::vec3{ std::stof(lineParts[10], NULL), std::stof(lineParts[11], NULL), std::stof(lineParts[12], NULL) };
+					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[13]);
+					std::shared_ptr<Triangle> triangle = std::make_shared<Triangle>(a, b,  c,name, mat);
+					scene.shape_vec_.push_back(triangle);
+					std::cout << "Triangle: " << *triangle << "\n";
+				}
+				catch (std::invalid_argument arg)
+				{
+					std::cout << "Something went wrong, while loading the triangle. Check format!\n";
 					std::cout << "Throws exception : " << arg.what() << "\n";
 				}
 			}

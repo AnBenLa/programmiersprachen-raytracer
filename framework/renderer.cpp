@@ -27,8 +27,8 @@ void Renderer::render(Scene const& scene, int frames)
 	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
 	double frame_times = 0;
 	for (int i = 0; i < frames;++i) {
-		scene.camera_->position_ = glm::vec3{- 100 + i, 0 , 100 - i/2.0f};
-		scene.light_vec_.at(0)->position_ = glm::vec3{ 500,800,i*6 };
+		scene.camera_->position_ = glm::vec3{ 0, 0 , 100 - i };
+		//scene.light_vec_.at(0)->position_ = glm::vec3{ 500,800,i*6 };
 		auto start = std::chrono::high_resolution_clock::now();
 	
 		for (unsigned y = 0; y < height_; ++y) {
@@ -42,7 +42,7 @@ void Renderer::render(Scene const& scene, int frames)
 			for (unsigned x = 0; x < width_; ++x) {
 				
 				Pixel p(x, y);
-				p.color = Color(0.2314, 0.5137, 0.7412);
+				p.color = Color{ 0.2314, 0.5137, 0.7412 };
 				
 				//generate the camera ray
 				glm::vec3 pos = scene.camera_->position_;
@@ -58,6 +58,10 @@ void Renderer::render(Scene const& scene, int frames)
 					//Color current_color = calculate_depth_map(closest_cut, scene, 600);
 					Color current_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, ray);
 					//tone mapping ???
+					//float tone_r = current_color.r / (current_color.r + 1);
+					//float tone_g = current_color.g / (current_color.g + 1);
+					//float tone_b = current_color.b / (current_color.b + 1);
+					//current_color = Color{ tone_r,tone_g,tone_b };
 					p.color = current_color;
 				}
 				write(p);
@@ -119,7 +123,7 @@ Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 con
 	Ray new_ray{ cut + 0.1f*normal, glm::normalize(reflection_vec) };
 	Hit hit = get_closest_hit(scene, new_ray);
 	if (hit.shape_ == nullptr) {
-		return { 0.0f, 0.0f, 0.0f };
+		return Color{ 0.2314, 0.5137, 0.7412 };;
 	} else {
 		Color reflected_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, new_ray);
 		return reflected_color;

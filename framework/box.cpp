@@ -121,11 +121,6 @@ bool Box::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& n
 	return false;
 };
 
-Ray Box::reflect(glm::vec3 cut_point, Ray const& incoming_ray) const {
-	Ray outcoming_ray{};
-	return outcoming_ray;
-}
-
 glm::vec3 Box::min() const {
 	return min_;
 }
