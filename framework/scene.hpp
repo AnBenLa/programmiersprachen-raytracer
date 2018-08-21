@@ -12,6 +12,7 @@
 #include "box.hpp"
 #include "sphere.hpp"
 #include "triangle.hpp"
+#include "cone.hpp"
 #include "camera.hpp"
 #include "light.hpp"
 #include "ambiente.hpp"
@@ -108,6 +109,23 @@ static void deserializeObjects(Scene& scene, std::string line){
 				catch (std::invalid_argument arg)
 				{
 					std::cout << "Something went wrong, while loading the triangle. Check format!\n";
+					std::cout << "Throws exception : " << arg.what() << "\n";
+				}
+			}
+			if (lineParts[2] == "cone") {
+				try {
+					std::string name = lineParts[3];
+					glm::vec3 base = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
+					glm::vec3 peak = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
+					float radius = std::stof(lineParts[10], NULL);
+					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
+					std::shared_ptr<Cone> cone = std::make_shared<Cone>(base, peak, radius, name, mat);
+					scene.shape_vec_.push_back(cone);
+					std::cout << "Cone: " << *cone << "\n";
+				}
+				catch (std::invalid_argument arg)
+				{
+					std::cout << "Something went wrong, while loading the cone. Check format!\n";
 					std::cout << "Throws exception : " << arg.what() << "\n";
 				}
 			}

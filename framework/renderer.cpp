@@ -55,8 +55,8 @@ void Renderer::render(Scene const& scene, int frames)
 
 				//if a shape is hit the pixel color is computed
 				if (hit.shape_ != nullptr) {
-					//Color current_color = calculate_depth_map(closest_cut, scene, 600);
-					Color current_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, ray);
+					//Color current_color = calculate_depth_map(hit.position_, scene, 600);
+					Color current_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, ray, 3);
 					//tone mapping ???
 					//float tone_r = current_color.r / (current_color.r + 1);
 					//float tone_g = current_color.g / (current_color.g + 1);
@@ -101,15 +101,14 @@ Hit Renderer::get_closest_hit(Scene const& scene, Ray const& ray) {
 	return Hit{ray.direction, closest_cut, closest_normal, closest_shape};
 }
 
-Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray) {
+Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step) {
 	Color final_value{ 0.0f,0.0f,0.0f };
 	Color ambient = calculate_ambiente(shape, scene);
 	Color diffuse = calculate_diffuse(shape, cut, normal, scene);
 	Color specular = calculate_specular(shape, cut, normal, scene);
-	//Color diffuse = calculate_depth_map(cut, scene, 600);
 	Color phong = ambient + diffuse;
 	if (shape->material()->glossy > 0) {
-		Color reflection = calculate_reflection(shape, cut, normal, scene, ray);
+		Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
 		final_value = phong * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
 	}else {
 		final_value = phong + specular;
@@ -118,15 +117,20 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 }
 
 //not implemented yet
-Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray){
+Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step){
 	glm::vec3 reflection_vec = glm::reflect(glm::normalize(ray.direction), glm::normalize(normal));
 	Ray new_ray{ cut + 0.1f*normal, glm::normalize(reflection_vec) };
 	Hit hit = get_closest_hit(scene, new_ray);
 	if (hit.shape_ == nullptr) {
-		return Color{ 0.2314, 0.5137, 0.7412 };;
+		return Color{ 0.2314, 0.5137, 0.7412 };
 	} else {
-		Color reflected_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, new_ray);
-		return reflected_color;
+		if (step > 0) {
+			Color reflected_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, new_ray, step - 1);
+			return reflected_color;
+		}
+		else {
+			return Color{ 0,0,0 };
+		}
 	}
 }
 

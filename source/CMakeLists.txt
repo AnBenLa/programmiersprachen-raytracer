@@ -20,6 +20,7 @@ add_executable(tests
   tests.cpp
   ../framework/sphere.cpp
   ../framework/triangle.cpp
+  ../framework/cone.cpp
   ../framework/box.cpp
   ../framework/shape.cpp
   ../framework/renderer.cpp
