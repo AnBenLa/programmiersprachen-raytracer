@@ -54,7 +54,7 @@ bool Cone::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& 
 		cut_point = ray.origin + t_1 * glm::normalize(ray.direction);
 		t = t_1;
 		
-		if (0 < glm::dot(cut_point - peak_, h)) {
+		if (0 < glm::dot(cut_point - peak_, h) && glm::length(peak_-cut_point) <= sqrt(pow(radius_,2) + pow(glm::length(h),2))) {
 			//normal not correct yet
 			float r = sqrt(pow(cut_point.x - base_.x, 2) + pow(cut_point.z - base_.z, 2));
 			float z = r * (radius_ / glm::length(h));
