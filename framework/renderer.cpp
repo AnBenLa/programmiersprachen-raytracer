@@ -116,7 +116,6 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	return  final_value;
 }
 
-//not implemented yet
 Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step){
 	glm::vec3 reflection_vec = glm::reflect(glm::normalize(ray.direction), glm::normalize(normal));
 	Ray new_ray{ cut + 0.1f*normal, glm::normalize(reflection_vec) };

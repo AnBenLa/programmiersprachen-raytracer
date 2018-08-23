@@ -37,6 +37,7 @@ define shape box chess_row_4_6  	200  	-100 	-400 	300   	-50 	-300 	black
 define shape sphere bsphere 0 		0 	-200 50 blue
 define shape sphere rsphere +100 	0 	-200 50 red
 define shape sphere gsphere -100 	0 	-200 50 green
+define shape cylinder bcylinder         0               400             -250     0      -400      -250         20        blue      
 # composite
 define shape composite root rbottom bsphere
 # scene xform

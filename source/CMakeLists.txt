@@ -21,6 +21,7 @@ add_executable(tests
   ../framework/sphere.cpp
   ../framework/triangle.cpp
   ../framework/cone.cpp
+  ../framework/cylinder.cpp
   ../framework/box.cpp
   ../framework/shape.cpp
   ../framework/renderer.cpp
