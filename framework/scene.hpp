@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <iterator>
 
 #include "material.hpp"
 #include "shape.hpp"
@@ -24,6 +25,157 @@ struct Scene {
 	std::shared_ptr<Ambiente> ambiente_;
 	std::shared_ptr<Camera> camera_;
 };
+
+static void readMTL_File(std::string const& path, Scene& scene){
+	std::ifstream ifs;
+	ifs.open(path);
+	if (!ifs.is_open()) {
+		std::cout << "\nFailed to open file at : "<< path << "\n" << std::endl;
+	}
+	else {
+		std::cout << "\nMTL Opened OK\n-----------------------------------------------------------------------------------------\n" << std::endl;
+		std::string name;
+		std::string line;
+		Color ka{0.0f,0.0f,0.0f};
+		Color kd{0.0f,0.0f,0.0f};
+		Color ks{0.0f,0.0f,0.0f};
+		float m = 0.0f;
+		bool first_mtl = false;
+		while(std::getline(ifs,line)){
+			std::vector<std::string> lineParts;
+			std::stringstream iss(line);
+			std::string word;
+			
+			while(iss >> word){
+				lineParts.push_back(word);
+			}
+			if(lineParts.size() > 1){
+				if(lineParts[0] == "newmtl"){
+					if(first_mtl){
+						std::shared_ptr<Material> mat = std::make_shared<Material>(name, ka, kd, ks, m);
+						std::cout << "Material: " << *mat << "\n";
+						scene.mat_map_.insert(std::pair<std::string, std::shared_ptr<Material>>(mat->name, mat));
+					}
+					if(!first_mtl){
+						first_mtl = true;
+					}
+					name = lineParts[1];
+				}
+				if(lineParts[0] == "Ka"){
+					ka = Color{stof(lineParts[1]),stof(lineParts[2]),stof(lineParts[3])};
+				}
+				if(lineParts[0] == "Kd"){
+					kd = Color{stof(lineParts[1]),stof(lineParts[2]),stof(lineParts[3])};
+				}
+				if(lineParts[0] == "Ks"){
+					ks = Color{stof(lineParts[1]),stof(lineParts[2]),stof(lineParts[3])};
+				}
+				if(lineParts[0] == "Ns"){
+					m = stof(lineParts[1]);
+				}
+			}		
+		}
+		if(first_mtl){
+			std::shared_ptr<Material> mat = std::make_shared<Material>(name, ka, kd, ks, m);
+			std::cout << "Material: " << *mat << "\n";
+			scene.mat_map_.insert(std::pair<std::string, std::shared_ptr<Material>>(mat->name, mat));
+		}
+		std::cout << "\nMTL loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;
+	}
+}
+
+static void readOBJ_File(std::string const& path, Scene& scene){
+	std::ifstream ifs;
+	int shapes = 0;
+	ifs.open(path);
+	if (!ifs.is_open()) {
+		std::cout << "\nFailed to open file at : "<< path << "\n" << std::endl;
+	}
+	else {
+		std::cout << "\nOBJ Opened OK\n-----------------------------------------------------------------------------------------\n" << std::endl;
+		std::string line;
+		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec3> normal_vertices;
+		std::shared_ptr<Material> current_material;
+		while(std::getline(ifs,line)){
+			std::vector<std::string> lineParts;
+			std::stringstream iss(line);
+			std::string word;
+			
+			while(iss >> word){
+				lineParts.push_back(word);
+			}
+			if(lineParts.size() > 1){
+				if(lineParts[0] == "usemtl"){
+					current_material = scene.mat_map_.at(lineParts[1]);
+				}
+				if(lineParts[0] == "v"){
+					glm::vec3 vertex = glm::vec3{stof(lineParts[1]), -stof(lineParts[3]), stof(lineParts[2])};
+					vertices.push_back(vertex);
+				}
+				if(lineParts[0] == "vn"){
+					glm::vec3 vertex = glm::vec3{stof(lineParts[1]), stof(lineParts[2]), stof(lineParts[3])};
+					normal_vertices.push_back(vertex);
+				}
+				if(lineParts[0] == "f"){
+					if(lineParts.size() == 5){
+						std::cout << shapes << "Error quad begin\n";
+						std::string v_1 = lineParts[1];
+						std::string v_2 = lineParts[2];
+						std::string v_3 = lineParts[3];
+						std::string v_4 = lineParts[4];
+
+						std::string v_1_1 = v_1.substr(0, v_1.find("//"));
+						v_1.erase(0, v_1.find("//") + 2);
+						std::string v_2_1 = v_2.substr(0, v_2.find("//"));
+						std::string v_3_1 = v_3.substr(0, v_3.find("//"));
+						std::string v_4_1 = v_4.substr(0, v_4.find("//"));
+
+						int v1 = stof(v_1_1) - 1;
+						int normal = stof(v_1) - 1;
+						int v2 = stof(v_2_1) - 1;
+						int v3 = stof(v_3_1) - 1;
+						int v4 = stof(v_4_1) - 1;
+
+						std::cout << "\n" << v1 << ", " << v2  << ", "<< v3  << ", "<< v4  << ", "<< normal << "\n";
+						std::cout << vertices.size() << ", " << normal_vertices.size() << "\n";
+
+						std::shared_ptr<Triangle> tri_1 = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v2), vertices.at(v3), normal_vertices.at(normal),"generic", current_material);
+						std::shared_ptr<Triangle> tri_2 = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v4), vertices.at(v3), normal_vertices.at(normal), "generic", current_material);
+						scene.shape_vec_.push_back(tri_1);
+						scene.shape_vec_.push_back(tri_2);
+						shapes += 1;
+						std::cout << shapes << "Error quad end\n";
+					} else if(lineParts.size() == 4){
+						std::cout << shapes << "Error tri begin\n";
+						std::string v_1 = lineParts[1];
+						std::string v_2 = lineParts[2];
+						std::string v_3 = lineParts[3];
+
+						std::string v_1_1 = v_1.substr(0, v_1.find("//"));
+						v_1.erase(0, v_1.find("//") + 2);
+						std::string v_2_1 = v_2.substr(0, v_2.find("//"));
+						std::string v_3_1 = v_3.substr(0, v_3.find("//"));
+
+						int v1 = stof(v_1_1) - 1;
+						int normal = stof(v_1) - 1;
+						int v2 = stof(v_2_1) - 1;
+						int v3 = stof(v_3_1) - 1;
+
+
+						std::shared_ptr<Triangle> tri = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v2), vertices.at(v3), normal_vertices.at(normal),"generic", current_material);
+						scene.shape_vec_.push_back(tri);
+						shapes +=1;
+						std::cout << shapes << "Error tri end\n";
+					}
+				}
+			}
+		}
+		std::cout << vertices.size() << " vertices loaded\n";
+		std::cout << shapes << " faces loaded\n";
+		std::cout << "\nOBJ loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;
+	}
+}
 
 static void deserializeObjects(Scene& scene, std::string line){
 	std::vector<std::string> lineParts;
@@ -164,6 +316,14 @@ static void deserializeObjects(Scene& scene, std::string line){
 				std::cout << "Something went wrong, while loading the camera. Check format!\n";
 				std::cout << "Throws exception : " << arg.what() << "\n";
 			}
+		}
+		if(lineParts[1] == "mtl"){
+			std::string path = lineParts[2];
+			readMTL_File(path, scene);
+		}
+		if(lineParts[1] == "obj"){
+			std::string path = lineParts[2];
+			readOBJ_File(path, scene);
 		}
 	}
 	if (lineParts[0] == "ambient") {

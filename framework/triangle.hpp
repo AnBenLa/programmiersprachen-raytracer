@@ -8,6 +8,7 @@
 class Triangle : public Shape {
 public:
 	Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, std::string name, std::shared_ptr<Material> material);
+	Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 normal, std::string name, std::shared_ptr<Material> material);
 	~Triangle();
 	double area() const override;
 	double volume() const override;
@@ -20,5 +21,7 @@ private:
 	glm::vec3 a_;
 	glm::vec3 b_;
 	glm::vec3 c_;
+	glm::vec3 normal_;
+	bool cust_normal_ = false;
 };
 #endif

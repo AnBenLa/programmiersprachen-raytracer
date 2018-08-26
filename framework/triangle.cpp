@@ -14,6 +14,9 @@
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, std::string name, std::shared_ptr<Material> material) :
 	Shape{ name, material }, a_{ a }, b_{ b }, c_{c} {};
 
+Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 normal ,std::string name, std::shared_ptr<Material> material) :
+	Shape{ name, material }, a_{ a }, b_{ b }, c_{c}, normal_{normal}, cust_normal_{true} {};
+
 Triangle::~Triangle() {}
 
 //not implemented yet
@@ -29,7 +32,7 @@ std::ostream& Triangle::print(std::ostream& os) const {
 	return Shape::print(os) << "A: (" << a_.x << ", " << a_.y << ", " << a_.z << "), B: (" << b_.x << ", " << b_.y << ", " << b_.z << "), C: (" << c_.x << ", " << c_.y << ", " << c_.z << ")\n";
 };
 
-//Möller–Trumbore ray-triangle intersection algorithm was used
+//Mï¿½llerï¿½Trumbore ray-triangle intersection algorithm was used
 bool Triangle::intersect(Ray const& ray, float& g, glm::vec3& cut_point, glm::vec3& normal) const {
 	const float EPSILON = 0.0000001;
 	glm::vec3 a_b, a_c, h, s, q;
@@ -59,7 +62,11 @@ bool Triangle::intersect(Ray const& ray, float& g, glm::vec3& cut_point, glm::ve
 	{
 		cut_point = ray.origin + ray.direction * t;
 		g = glm::length(cut_point - ray.origin);
-		normal = glm::normalize(glm::cross(a_b, a_c));
+		if(cust_normal_){
+			normal = glm::normalize(normal_);
+		} else {
+			normal = glm::normalize(glm::cross(a_b, a_c));
+		}
 		return true;
 	}
 	else // This means that there is a line intersection but not a ray intersection.

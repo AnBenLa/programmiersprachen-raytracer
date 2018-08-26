@@ -8,10 +8,10 @@
 
 int main(int argc, char* argv[])
 {
-	//TODO Die zu berechnenden Strahlen müssen korrekt berechnet werden.
-	// Die Box intersect Methode muss überprüft werden...
+	//TODO Die zu berechnenden Strahlen mï¿½ssen korrekt berechnet werden.
+	// Die Box intersect Methode muss ï¿½berprï¿½ft werden...
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-  readSDF_File("C:\\Test.sdf", *scene);
+  readSDF_File("/home/anbenla/raytracer/programmiersprachen-raytracer/Ãœbung-7/Test.sdf", *scene);
   
   unsigned const image_width = 480;
   unsigned const image_height = 320;
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 
   renderer.render(*scene, 1);
   //create separate thread to see updates of pixels while rendering
-  //std::thread render_thread([&renderer, scene]() {renderer.render(*scene);});
+  //std::thread render_thread([&renderer, scene]() {renderer.render(*scene, 1);});
 
   Window window{{image_width, image_height}};
 
