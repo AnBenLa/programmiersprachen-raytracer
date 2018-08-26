@@ -119,46 +119,40 @@ static void readOBJ_File(std::string const& path, Scene& scene){
 				}
 				if(lineParts[0] == "f"){
 					if(lineParts.size() == 5){
-						std::cout << shapes << "Error quad begin\n";
 						std::string v_1 = lineParts[1];
 						std::string v_2 = lineParts[2];
 						std::string v_3 = lineParts[3];
 						std::string v_4 = lineParts[4];
 
-						std::string v_1_1 = v_1.substr(0, v_1.find("//"));
-						v_1.erase(0, v_1.find("//") + 2);
-						std::string v_2_1 = v_2.substr(0, v_2.find("//"));
-						std::string v_3_1 = v_3.substr(0, v_3.find("//"));
-						std::string v_4_1 = v_4.substr(0, v_4.find("//"));
+						std::string v_1_1 = v_1.substr(0, v_1.find("/"));
+						v_1.erase(0, v_1.find("/") + 1);
+						std::string v_2_1 = v_2.substr(0, v_2.find("/"));
+						std::string v_3_1 = v_3.substr(0, v_3.find("/"));
+						std::string v_4_1 = v_4.substr(0, v_4.find("/"));
 
 						int v1 = stof(v_1_1) - 1;
-						int normal = stof(v_1) - 1;
+						int normal = stof(v_1.substr(v_1.find("/") + 1)) - 1;
 						int v2 = stof(v_2_1) - 1;
 						int v3 = stof(v_3_1) - 1;
 						int v4 = stof(v_4_1) - 1;
-
-						std::cout << "\n" << v1 << ", " << v2  << ", "<< v3  << ", "<< v4  << ", "<< normal << "\n";
-						std::cout << vertices.size() << ", " << normal_vertices.size() << "\n";
 
 						std::shared_ptr<Triangle> tri_1 = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v2), vertices.at(v3), normal_vertices.at(normal),"generic", current_material);
 						std::shared_ptr<Triangle> tri_2 = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v4), vertices.at(v3), normal_vertices.at(normal), "generic", current_material);
 						scene.shape_vec_.push_back(tri_1);
 						scene.shape_vec_.push_back(tri_2);
 						shapes += 1;
-						std::cout << shapes << "Error quad end\n";
 					} else if(lineParts.size() == 4){
-						std::cout << shapes << "Error tri begin\n";
 						std::string v_1 = lineParts[1];
 						std::string v_2 = lineParts[2];
 						std::string v_3 = lineParts[3];
 
 						std::string v_1_1 = v_1.substr(0, v_1.find("//"));
-						v_1.erase(0, v_1.find("//") + 2);
+						v_1.erase(0, v_1.find("/") + 1);
 						std::string v_2_1 = v_2.substr(0, v_2.find("//"));
 						std::string v_3_1 = v_3.substr(0, v_3.find("//"));
 
 						int v1 = stof(v_1_1) - 1;
-						int normal = stof(v_1) - 1;
+						int normal = stof(v_1.substr(v_1.find("/") + 1)) - 1;
 						int v2 = stof(v_2_1) - 1;
 						int v3 = stof(v_3_1) - 1;
 
@@ -166,7 +160,6 @@ static void readOBJ_File(std::string const& path, Scene& scene){
 						std::shared_ptr<Triangle> tri = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v2), vertices.at(v3), normal_vertices.at(normal),"generic", current_material);
 						scene.shape_vec_.push_back(tri);
 						shapes +=1;
-						std::cout << shapes << "Error tri end\n";
 					}
 				}
 			}

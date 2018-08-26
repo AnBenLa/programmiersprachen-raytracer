@@ -13,6 +13,7 @@
 #include <math.h>
 #include <string>
 #include <chrono>
+#include <ppl.h>
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
   : width_(w)
@@ -27,29 +28,32 @@ void Renderer::render(Scene const& scene, int frames)
 	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
 	double frame_times = 0;
 	for (int i = 0; i < frames;++i) {
-		scene.camera_->position_ = glm::vec3{ 0, 0 , 0 - i };
-		scene.light_vec_.at(0)->position_ = glm::vec3{ -10,0,10 };
+		scene.camera_->position_ = glm::vec3{ 0, 0 , 200 - i };
+		//scene.light_vec_.at(0)->position_ = glm::vec3{ -10,0,10 };
 		auto start = std::chrono::high_resolution_clock::now();
-	
-		for (unsigned y = 0; y < height_; ++y) {
-			if (y == height_ / 4) {
+		int progress = 0;
+
+		Concurrency::parallel_for (std::size_t(0), std::size_t(height_), [&](std::size_t y) {
+			std::cout << y << "\n";
+			if (progress == height_ / 4) {
 				std::cout << "25% - ";
-			} else if (y == height_ / 2) {
+			}
+			else if (progress == height_ / 2) {
 				std::cout << "50% - ";
-			} else if (y == (3 * height_) / 4) {
+			}
+			else if (progress == (3 * height_) / 4) {
 				std::wcout << "75%\n";
 			}
 			for (unsigned x = 0; x < width_; ++x) {
-				
 				Pixel p(x, y);
 				p.color = Color{ 0.2314, 0.5137, 0.7412 };
-				
+
 				//generate the camera ray
 				glm::vec3 pos = scene.camera_->position_;
 				glm::vec3 dir = glm::normalize(scene.camera_->direction_);
 				dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
 				Ray ray{ pos , glm::normalize(dir) };
-				
+
 				//calculate the first shape that gets hit
 				Hit hit = get_closest_hit(scene, ray);
 
@@ -66,7 +70,8 @@ void Renderer::render(Scene const& scene, int frames)
 				}
 				write(p);
 			}
-		}
+			progress += 1;
+		});
 		auto finish = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = finish - start;
 		double elapsed_s = elapsed.count();
@@ -75,6 +80,7 @@ void Renderer::render(Scene const& scene, int frames)
 		frame_times += elapsed_s;
 		ppm_.save(filename_ + "_" + std::to_string(i) + ".ppm");
 	}
+	
 		std::cout << "Rendertime total: " << frame_times << ", Rendertime per Frame: " << frame_times / frames;
 }
 

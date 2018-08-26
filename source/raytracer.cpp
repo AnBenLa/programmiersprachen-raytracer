@@ -11,10 +11,10 @@ int main(int argc, char* argv[])
 	//TODO Die zu berechnenden Strahlen m�ssen korrekt berechnet werden.
 	// Die Box intersect Methode muss �berpr�ft werden...
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-  readSDF_File("/home/anbenla/raytracer/programmiersprachen-raytracer/Übung-7/Test.sdf", *scene);
+  readSDF_File("C:\\Test.sdf", *scene);
   
-  unsigned const image_width = 480;
-  unsigned const image_height = 320;
+  unsigned const image_width = 1920;
+  unsigned const image_height = 1080;
   std::string const filename = "./checkerboard";
 
   Renderer renderer{ image_width, image_height, filename };
