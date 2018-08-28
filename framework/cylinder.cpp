@@ -35,7 +35,7 @@ std::ostream& Cylinder::print(std::ostream& os) const {
 }
 
 //not ready yet
-bool Cylinder::intersect(Ray const& ray, float& r, glm::vec3& cut_point, glm::vec3& normal)const
+std::shared_ptr<Hit> Cylinder::intersect(Ray const& ray, glm::vec3& cut_point, glm::vec3& normal)const
 {
     //check intersection with infinite cylinder
     //used idea of https://www.gamedev.net/forums/topic/467789-raycylinder-intersection/
@@ -48,18 +48,20 @@ bool Cylinder::intersect(Ray const& ray, float& r, glm::vec3& cut_point, glm::ve
     float b = 2*glm::dot(VxAB,AOxAB);
     float c = glm::dot(AOxAB,AOxAB)-(radius_*radius_*ab2);
 
+    float distance;
+
     //solve quadratic equation
     float p = pow(b,2)-4*a*c;
     if(p<0)
     {
         //quadratic equation has no result -> no intersection
-        return false;
+        return nullptr;
     }
     else{
         float x1 = (-b+sqrt(p))/2*a;
         float x2 = (-b-sqrt(p))/2*a;
         //if x1=x2 quadratic equation has only one result (tangent)
-        return true;
+        return std::make_shared<Hit>(ray.direction,cut_point,normal,std::make_shared<Shape>(this),distance);
     }
 
     //check if the intersection is between planes (bottom/top)
@@ -67,9 +69,6 @@ bool Cylinder::intersect(Ray const& ray, float& r, glm::vec3& cut_point, glm::ve
 
     //check for intersection with planes (base)
 
-
-    
-    return true;
 }
 
 void Cylinder::calculateBoundingBox()

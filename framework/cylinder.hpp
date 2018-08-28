@@ -5,6 +5,7 @@
 #include "color.hpp"
 #include "ray.hpp"
 #include "box.hpp"
+#include "hit.hpp"
 
 class Cylinder : public Shape
 {
@@ -14,7 +15,7 @@ class Cylinder : public Shape
         double area()const override;
         double volume()const override;
         std::ostream& print(std::ostream& os)const override;
-        bool intersect(Ray const& ray, float& r,glm::vec3&,glm::vec3&)const override;
+        std::shared_ptr<Hit>intersect(Ray const& ray,glm::vec3&,glm::vec3&)const override;
 
         //getter
         glm::vec3 top() const;

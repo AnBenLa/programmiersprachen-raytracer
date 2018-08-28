@@ -5,6 +5,7 @@
 #include "color.hpp"
 #include "ray.hpp"
 #include "box.hpp"
+#include "hit.hpp"
 
 class Triangle : public Shape {
 public:
@@ -14,7 +15,7 @@ public:
 	double area() const override;
 	double volume() const override;
 	std::ostream& print(std::ostream& os) const override;
-	bool intersect(Ray const&, float& r, glm::vec3&, glm::vec3&) const override;
+	std::shared_ptr<Hit>intersect(Ray const&, glm::vec3&, glm::vec3&) const override;
 	glm::vec3 point_a() const;
 	glm::vec3 point_b() const;
 	glm::vec3 point_c() const;

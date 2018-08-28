@@ -37,7 +37,7 @@ std::ostream& Triangle::print(std::ostream& os) const {
 };
 
 //M�ller�Trumbore ray-triangle intersection algorithm was used
-bool Triangle::intersect(Ray const& ray, float& g, glm::vec3& cut_point, glm::vec3& normal) const {
+std::shared_ptr<Hit>Triangle::intersect(Ray const& ray, glm::vec3& cut_point, glm::vec3& normal) const {
 	const float EPSILON = 0.0000001;
 	glm::vec3 a_b, a_c, h, s, q;
 	float a, f, u, v;
@@ -47,34 +47,34 @@ bool Triangle::intersect(Ray const& ray, float& g, glm::vec3& cut_point, glm::ve
 	a = glm::dot(a_b,h);
 	//the ray is parallel
 	if (a > -EPSILON && a < EPSILON) {
-		return false;
+		return nullptr;
 	}
 	f = 1 / a;
 	s = ray.origin - a_;
 	u = f * (glm::dot(s,h));
 	if (u < 0.0 || u > 1.0) {
-		return false;
+		return nullptr;
 	}
 	q = glm::cross(s,a_b);
 	v = f * glm::dot(ray.direction,q);
 	if (v < 0.0 || u + v > 1.0) {
-		return false;
+		return nullptr;
 	}
 	// At this stage we can compute t to find out where the intersection point is on the line.
 	float t = f * glm::dot(a_c,q);
 	if (t > EPSILON) // ray intersection
 	{
 		cut_point = ray.origin + ray.direction * t;
-		g = glm::length(cut_point - ray.origin);
+		float distance{glm::length(cut_point - ray.origin)};
 		if(cust_normal_){
 			normal = glm::normalize(normal_);
 		} else {
 			normal = glm::normalize(glm::cross(a_b, a_c));
 		}
-		return true;
+		return std::make_shared<Hit>(ray.direction,cut_point,normal,std::make_shared<Shape>(this),distance);
 	}
 	else // This means that there is a line intersection but not a ray intersection.
-		return false;
+		return nullptr;
 };
 
 glm::vec3 Triangle::point_a() const {

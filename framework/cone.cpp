@@ -31,7 +31,7 @@ std::ostream& Cone::print(std::ostream& os) const {
 	return Shape::print(os) << "Base: (" << base_.x << ", " << base_.y << ", " << base_.z << "), Peak: (" << peak_.x << ", " << peak_.y << ", " << peak_.z << "), Radius: "<< radius_ <<"\n";
 };
 
-bool Cone::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& normal) const {
+std::shared_ptr<Hit> Cone::intersect(Ray const& ray, glm::vec3& cut_point, glm::vec3& normal) const {
 	
 	glm::vec3 v = ray.direction;
 	glm::vec3 h = base_ - peak_;
@@ -56,7 +56,7 @@ bool Cone::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& 
 		}
 		
 		cut_point = ray.origin + t_1 * glm::normalize(ray.direction);
-		t = t_1;
+		float distance{t_1};
 		
 		if (0 < glm::dot(cut_point - peak_, h) && glm::length(peak_-cut_point) <= sqrt(pow(radius_,2) + pow(glm::length(h),2))) {
 			//normal not correct yet
@@ -64,7 +64,7 @@ bool Cone::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& 
 			float z = r * (radius_ / glm::length(h));
 			glm::vec3 p = glm::vec3{ cut_point.x - base_.x, z, cut_point.z - base_.z };
 			normal = glm::normalize(p);
-			return true;
+			return std::make_shared<Hit>(ray.direction,cut_point,normal,std::make_shared<Shape>(this),distance);
 		}
 		return false;
 
