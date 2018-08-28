@@ -29,10 +29,15 @@ std::ostream& Sphere::print(std::ostream& os) const {
 	return Shape::print(os) << "Center: (" << center_.x << ", " << center_.y << ", " << center_.z << "), Radius: (" << radius_ << ")\n";
 };
 
-bool Sphere::intersect(Ray const& ray, float& distance, glm::vec3& cut_point, glm::vec3& normal) const {
-	bool status = glm::intersectRaySphere(ray.origin, glm::normalize(ray.direction), center_, radius_, cut_point , normal);
-	distance = glm::length(cut_point - ray.origin);
-	return status;
+std::shared_ptr<Hit> Sphere::intersect(Ray const& ray, glm::vec3& cut_point, glm::vec3& normal) const {
+	std::shared_ptr<Hit> hit = nullptr;
+	bool hit_found = glm::intersectRaySphere(ray.origin, glm::normalize(ray.direction), center_, radius_, cut_point , normal);
+	if (hit_found) {
+		float distance = glm::length(cut_point - ray.origin);
+		hit = std::make_shared<Hit>(ray.direction, cut_point, normal, std::make_shared<Shape>(this), distance);
+	}
+
+	return hit;
 }
 
 glm::vec3 Sphere::center() const { return center_; };
