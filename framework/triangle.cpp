@@ -18,7 +18,9 @@ Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, std::string name, std:
 	};
 
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 normal ,std::string name, std::shared_ptr<Material> material) :
-	Shape{ name, material }, a_{ a }, b_{ b }, c_{c}, normal_{normal}, cust_normal_{true} {};
+	Shape{ name, material }, a_{ a }, b_{ b }, c_{c}, normal_{normal}, cust_normal_{true} {
+		calculateBoundingBox();
+};
 
 Triangle::~Triangle() {}
 

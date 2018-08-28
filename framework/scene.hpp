@@ -99,7 +99,7 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 		std::vector<glm::vec3> vertices;
 		std::vector<glm::vec3> normal_vertices;
 		std::shared_ptr<Material> current_material;
-		std::shared_ptr<Composite> current_comp;
+		std::shared_ptr<Composite> current_comp = nullptr;
 		while(std::getline(ifs,line)){
 			std::vector<std::string> lineParts;
 			std::stringstream iss(line);
@@ -109,7 +109,7 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 				lineParts.push_back(word);
 			}
 			if(lineParts.size() > 1){
-				if (lineParts[0] == "0") {
+				if (lineParts[0] == "o") {
 					std::string name = lineParts[1];
 					if (current_comp != nullptr) {
 						obj_comp->add(current_comp);
