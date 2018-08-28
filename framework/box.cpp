@@ -12,7 +12,10 @@
 
 
 Box::Box(glm::vec3 min, glm::vec3 max, std::string name, std::shared_ptr<Material> material) :
-	Shape{ name, material }, min_{ min }, max_{ max } {};
+	Shape{ name, material }, min_{ min }, max_{ max }, boundingBox_{nullptr} 
+	{
+		boundingBox_ = std::make_shared<Box>(min_,max_,name+" BoundingBox",nullptr);
+	};
 
 Box::~Box() {}
 
@@ -70,7 +73,7 @@ bool Box::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& n
 			cut_normals.push_back(plane4.normal);
 		}
 	}
-	//untere Fläche
+	//untere Flï¿½che
 	if (distance2 > 0){
 		cut_point = ray.origin + distance2 * ray.direction;
 		if (cut_point.y < max_.y && cut_point.y > min_.y && cut_point.x < max_.x && cut_point.x > min_.x) {
@@ -78,7 +81,7 @@ bool Box::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& n
 			cut_normals.push_back(plane2.normal);
 		}
 	}
-	//obere Fläche
+	//obere Flï¿½che
 	if (distance5 > 0) {
 		cut_point = ray.origin + distance5 * ray.direction;
 		if (cut_point.y < max_.y && cut_point.y > min_.y && cut_point.x < max_.x && cut_point.x > min_.x) {
@@ -120,6 +123,11 @@ bool Box::intersect(Ray const& ray, float& t, glm::vec3& cut_point, glm::vec3& n
 
 	return false;
 };
+
+std::shared_ptr<Box> Box::getBoundingBox()const
+{
+	return boundingBox_;
+}
 
 glm::vec3 Box::min() const {
 	return min_;
