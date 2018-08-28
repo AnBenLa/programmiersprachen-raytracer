@@ -12,7 +12,10 @@ Cylinder::Cylinder(glm::vec3 const& base, glm::vec3 const& top, double radius, s
     base_{base},
     top_{top},
     radius_{radius}
-{};
+    {
+        calculateBoundingBox();
+    };
+
 Cylinder::~Cylinder(){};
 
 double Cylinder::area()const
@@ -67,4 +70,12 @@ bool Cylinder::intersect(Ray const& ray, float& r, glm::vec3& cut_point, glm::ve
 
     
     return true;
+}
+
+void Cylinder::calculateBoundingBox()
+{
+    glm::vec3 minBbox{base_.x-radius_,base_.y-radius_,base_.z-radius_};
+    glm::vec3 maxBbox{top_.x+radius_,top_.y+radius_,top_.z+radius_};
+
+    boundingBox_= std::make_shared<Box>(minBbox,maxBbox,name()+"BoundingBox",nullptr);
 }

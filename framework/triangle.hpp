@@ -4,6 +4,7 @@
 #include "shape.hpp"
 #include "color.hpp"
 #include "ray.hpp"
+#include "box.hpp"
 
 class Triangle : public Shape {
 public:
@@ -16,9 +17,12 @@ public:
 	glm::vec3 point_a() const;
 	glm::vec3 point_b() const;
 	glm::vec3 point_c() const;
+	std::shared_ptr<Box>getBoundingBox()const override;
+	
 private:
 	glm::vec3 a_;
 	glm::vec3 b_;
 	glm::vec3 c_;
+	void calculateBoundingBox();
 };
 #endif

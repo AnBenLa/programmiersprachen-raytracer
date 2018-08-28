@@ -7,9 +7,13 @@
 #include <string>
 #include <glm/gtx/intersect.hpp>
 #include "ray.hpp"
+#include "box.hpp"
 
 Sphere::Sphere(glm::vec3 center, double radius, std::string name, std::shared_ptr<Material> material) :
-	Shape{name, material}, center_ { center }, radius_{ radius } {};
+	Shape{name, material}, center_ { center }, radius_{ radius } 
+	{
+		calculateBoundingBox();
+	};
 
 Sphere::~Sphere() {};
 
@@ -34,3 +38,11 @@ bool Sphere::intersect(Ray const& ray, float& distance, glm::vec3& cut_point, gl
 glm::vec3 Sphere::center() const { return center_; };
 
 double Sphere::radius() const { return radius_; };
+
+void Sphere::calculateBoundingBox()
+{
+	glm::vec3 minBbox{center_.x-radius_,center_.y-radius_,center_.z-radius_};
+    glm::vec3 maxBbox{center_.x+radius_,center_.y+radius_,center_.z+radius_};
+
+    boundingBox_= std::make_shared<Box>(minBbox,maxBbox,name()+"BoundingBox",nullptr);
+}

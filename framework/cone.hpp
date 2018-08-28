@@ -16,9 +16,12 @@ public:
 	float radius() const;
 	glm::vec3 peak() const;
 	glm::vec3 base() const;
+	std::shared_ptr<Box>getBoundingBox()const override;
+	
 private:
 	float radius_;
 	glm::vec3 peak_;
 	glm::vec3 base_;
+	void calculateBoundingBox();
 };
 #endif

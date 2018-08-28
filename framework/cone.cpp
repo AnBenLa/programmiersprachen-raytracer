@@ -6,10 +6,14 @@
 #include "color.hpp"
 #include "ray.hpp"
 #include "cone.hpp"
+#include "box.hpp"
 
 
 Cone::Cone(glm::vec3 base, glm::vec3 peak, float radius ,std::string name, std::shared_ptr<Material> material) :
-	Shape{ name, material }, base_{ base }, peak_{ peak }, radius_{radius} {};
+	Shape{ name, material }, base_{ base }, peak_{ peak }, radius_{radius} 
+	{
+		calculateBoundingBox();
+	};
 
 Cone::~Cone() {}
 
@@ -78,6 +82,14 @@ glm::vec3 Cone::base() const {
 
 float Cone::radius() const {
 	return radius_;
+}
+
+void Cone::calculateBoundingBox()
+{
+	glm::vec3 minBbox{base_.x-radius_,base_.y-radius_,base_.z-radius_};
+    glm::vec3 maxBbox{peak_.x+radius_,peak_.y+radius_,peak_.z+radius_};
+
+    boundingBox_= std::make_shared<Box>(minBbox,maxBbox,name()+"BoundingBox",nullptr);
 }
 
 

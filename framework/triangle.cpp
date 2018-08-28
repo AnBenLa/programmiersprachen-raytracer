@@ -12,13 +12,17 @@
 
 
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, std::string name, std::shared_ptr<Material> material) :
-	Shape{ name, material }, a_{ a }, b_{ b }, c_{c} {};
+	Shape{ name, material }, a_{ a }, b_{ b }, c_{c} 
+	{
+		calculateBoundingBox();
+	};
 
 Triangle::~Triangle() {}
 
-//not implemented yet
 double Triangle::area() const {
-	return 0.0f;
+	glm::vec3 AB{b_-a_};
+	glm::vec3 AC{c_-a_};
+	return glm::length(glm::cross(AB,AC))/2;
 };
 
 double Triangle::volume() const {
@@ -29,7 +33,7 @@ std::ostream& Triangle::print(std::ostream& os) const {
 	return Shape::print(os) << "A: (" << a_.x << ", " << a_.y << ", " << a_.z << "), B: (" << b_.x << ", " << b_.y << ", " << b_.z << "), C: (" << c_.x << ", " << c_.y << ", " << c_.z << ")\n";
 };
 
-//Möller–Trumbore ray-triangle intersection algorithm was used
+//Mï¿½llerï¿½Trumbore ray-triangle intersection algorithm was used
 bool Triangle::intersect(Ray const& ray, float& g, glm::vec3& cut_point, glm::vec3& normal) const {
 	const float EPSILON = 0.0000001;
 	glm::vec3 a_b, a_c, h, s, q;
@@ -78,3 +82,16 @@ glm::vec3 Triangle::point_c() const {
 	return c_;
 }
 
+std::shared_ptr<Box>Triangle::getBoundingBox()const
+{
+	return boundingBox_;
+}
+
+void Triangle::calculateBoundingBox()
+{
+	glm::vec3 AC{c_-a_};
+	glm::vec3 minBbox{a_};
+    glm::vec3 maxBbox{b_+AC};
+
+    boundingBox_= std::make_shared<Box>(minBbox,maxBbox,name()+"BoundingBox",nullptr);
+}
