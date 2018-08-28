@@ -28,6 +28,7 @@ add_executable(tests
   ../framework/renderer.cpp
   ../framework/ppmwriter.cpp
   ../framework/pixel.cpp
+  ../framework/shape.cpp
    )
 target_link_libraries(tests
   ${GLFW_LIBRARIES}

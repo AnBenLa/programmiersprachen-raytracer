@@ -108,6 +108,8 @@ Hit Renderer::get_closest_hit(Scene const& scene, Ray const& ray) {
 	return Hit{ray.direction, closest_cut, closest_normal, closest_shape};
 }
 */
+
+
 Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step) {
 	Color final_value{ 0.0f,0.0f,0.0f };
 	Color ambient = calculate_ambiente(shape, scene);

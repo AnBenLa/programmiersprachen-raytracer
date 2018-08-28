@@ -105,7 +105,6 @@ std::vector<std::shared_ptr<Shape>>& Composite::getShapes(std::vector<std::share
     for(auto child : shapes_){
         shapes.push_back(child);
     };
-
     return shapes;
 }
 

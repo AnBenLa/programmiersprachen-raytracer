@@ -86,7 +86,6 @@ static void readMTL_File(std::string const& path, Scene& scene){
 	}
 }
 
-
 static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<Composite> obj_comp){
 	std::ifstream ifs;
 	int shapes = 0;

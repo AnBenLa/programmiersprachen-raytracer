@@ -42,7 +42,7 @@ void Sphere::calculateBoundingBox()
 	glm::vec3 minBbox{center_.x-radius_,center_.y-radius_,center_.z-radius_};
     glm::vec3 maxBbox{center_.x+radius_,center_.y+radius_,center_.z+radius_};
 
-    boundingBox_= std::make_shared<Box>(minBbox,maxBbox);
+    boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);
 }
 
 std::shared_ptr<BoundingBox> Sphere::boundingBox()const {
