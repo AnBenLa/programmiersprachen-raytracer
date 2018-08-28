@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <glm/vec3.hpp>
 #include <glm/gtx/norm.hpp>    
 #include <glm/gtx/intersect.hpp>
@@ -19,24 +21,12 @@ Cylinder::Cylinder(glm::vec3 const& base, glm::vec3 const& top, double radius, s
 
 Cylinder::~Cylinder(){};
 
-double Cylinder::area()const
-{
-    double top_bottom = M_PI*pow(radius_,2);
-    double side = 2*M_PI*glm::length(top_)*radius_;
-    return 2*top_bottom+side;
-}
-
-double Cylinder::volume()const
-{
-    return M_PI*pow(radius_,2)*glm::length(top_);
-}
-
 std::ostream& Cylinder::print(std::ostream& os) const {
 	return Shape::print(os)<<"Base: ("<<base_.x<<","<<base_.y<<","<<base_.z<<"), "<<"Top: ("<<top_.x<<","<<top_.y<<","<<top_.z<<"), "<<"Radius: "<<radius_<<"\n";
 }
 
 //not ready yet
-std::shared_ptr<Hit> Cylinder::intersect(Ray const& ray, glm::vec3& cut_point, glm::vec3& normal)const
+bool Cylinder::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape> shape)const
 {
     //check intersection with infinite cylinder
     glm::vec3 AB = base_ - top_;
@@ -53,7 +43,7 @@ std::shared_ptr<Hit> Cylinder::intersect(Ray const& ray, glm::vec3& cut_point, g
     if(p<0)
     {
         //quadratic equation has no result -> no intersection
-        return nullptr;
+        return false;
     }
     else{
         float x1 = (-b+sqrt(p))/2*a;
@@ -76,9 +66,11 @@ std::shared_ptr<Hit> Cylinder::intersect(Ray const& ray, glm::vec3& cut_point, g
 
         if(cut_distance1+cut_distance2<=glm::length(AB))
         {
-            return std::make_shared<Hit>(ray.direction,cut_point,normal,std::make_shared<Shape>(this),glm::length(cut_point-ray.origin));
+			distance = glm::length(cut_point - ray.origin);
+			shape = std::make_shared<Cylinder>(base_, top_, radius_, name(), material());
+			return true;
         }   
-        else return nullptr;    
+        else return false;    
     }
 }
 
@@ -87,5 +79,9 @@ void Cylinder::calculateBoundingBox()
     glm::vec3 minBbox{base_.x-radius_,base_.y-radius_,base_.z-radius_};
     glm::vec3 maxBbox{top_.x+radius_,top_.y+radius_,top_.z+radius_};
 
-    boundingBox_= std::make_shared<Box>(minBbox,maxBbox,name()+"BoundingBox",nullptr);
+    boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);
+}
+
+std::shared_ptr<BoundingBox> Cylinder::boundingBox() const {
+	return boundingBox_;
 }

@@ -4,24 +4,21 @@
 #include "shape.hpp"
 #include "color.hpp"
 #include "ray.hpp"
-#include "box.hpp"
-#include "hit.hpp"
+#include "boundingbox.hpp"
 
 class Cylinder : public Shape
 {
     public:
         Cylinder(glm::vec3 const& base,glm::vec3 const& top,double radius,std::string const& name,std::shared_ptr<Material> const& material);
         ~Cylinder();
-        double area()const override;
-        double volume()const override;
         std::ostream& print(std::ostream& os)const override;
-        std::shared_ptr<Hit>intersect(Ray const& ray,glm::vec3&,glm::vec3&)const override;
+        bool intersect(Ray const& ray, float& ,glm::vec3&,glm::vec3&, std::shared_ptr<Shape>)const override;
 
         //getter
         glm::vec3 top() const;
         glm::vec3 base()const;
         double radius() const;
-        std::shared_ptr<Box>getBoundingBox()const override;
+        std::shared_ptr<BoundingBox> boundingBox() const override;
 
     private:
         glm::vec3 base_;

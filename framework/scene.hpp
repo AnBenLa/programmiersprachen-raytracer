@@ -86,6 +86,7 @@ static void readMTL_File(std::string const& path, Scene& scene){
 	}
 }
 
+
 static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<Composite> obj_comp){
 	std::ifstream ifs;
 	int shapes = 0;
@@ -194,7 +195,6 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 	while(iss >> word){
 		lineParts.push_back(word);
 	}
-
 	if (lineParts[0] == "define") {
 		if (lineParts[1] == "material")
 		{
@@ -231,7 +231,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					glm::vec3 max = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[10]);
 					std::shared_ptr<Box> box = std::make_shared<Box>(min, max, name, mat);
-					shape_map.insert<name,box>;
+					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, box));
 					std::cout << "Box: " << *box << "\n";
 				}
 				catch (std::invalid_argument arg)
@@ -247,7 +247,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					int radius = std::stof(lineParts[7], NULL);
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[8]);
 					std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(center, radius, name, mat);
-					shape_map.insert<name, sphere>;
+					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, sphere));
 					std::cout << "Sphere: " << *sphere << "\n";
 				}
 				catch (std::invalid_argument arg)
@@ -264,7 +264,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					glm::vec3 c = glm::vec3{ std::stof(lineParts[10], NULL), std::stof(lineParts[11], NULL), std::stof(lineParts[12], NULL) };
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[13]);
 					std::shared_ptr<Triangle> triangle = std::make_shared<Triangle>(a, b,  c,name, mat);
-					shape_map.insert<name, triangle>;
+					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, triangle));
 					std::cout << "Triangle: " << *triangle << "\n";
 				}
 				catch (std::invalid_argument arg)
@@ -281,7 +281,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					float radius = std::stof(lineParts[10], NULL);
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
 					std::shared_ptr<Cone> cone = std::make_shared<Cone>(base, peak, radius, name, mat);
-					shape_map.insert<name, cone>;
+					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, cone));
 					std::cout << "Cone: " << *cone << "\n";
 				}
 				catch (std::invalid_argument arg)
@@ -299,7 +299,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					float radius = std::stof(lineParts[10],NULL);
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
 					std::shared_ptr<Cylinder>cylinder = std::make_shared<Cylinder>(base,top,radius,name,mat);
-					shape_map.insert<name, cylinder>;
+					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, cylinder));
 					std::cout<<"Cylinder: "<<*cylinder<<"\n";
 				}
 				catch (std::invalid_argument arg)
@@ -325,7 +325,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 						}
 					}
 					std::shared_ptr<Composite> composite = std::make_shared<Composite>(name, shapes, composites);
-					composite_map.insert<name, composite>;
+					composite_map.insert(std::pair<std::string, std::shared_ptr<Composite>>(name, composite));
 					if (name == "root") {
 						scene.root_composite_ = composite;
 					}
@@ -337,7 +337,6 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					std::cout << "Throws exception: " << arg.what() << "\n";
 				}
 			}
-
 		}
 		if (lineParts[1] == "light") {
 			std::cout << "Load light ...\n";
@@ -395,6 +394,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 			std::cout << "Something went wrong, while loading the ambiente. Check format!\n";
 			std::cout << "Throws exception : " << arg.what() << "\n";
 		}
+
 	}
 }
 

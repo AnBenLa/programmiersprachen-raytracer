@@ -1,7 +1,9 @@
-#include "shape.hpp"
-#include "color.hpp"
 #include <iostream>
 #include <string>
+
+#include "shape.hpp"
+#include "color.hpp"
+
 
 Shape::Shape(std::string const& name, std::shared_ptr<Material> const& material) : name_{ name }, material_{ material}, boundingBox_{nullptr} {};
 

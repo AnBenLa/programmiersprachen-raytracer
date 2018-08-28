@@ -22,22 +22,12 @@ Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 normal ,std:
 
 Triangle::~Triangle() {}
 
-double Triangle::area() const {
-	glm::vec3 AB{b_-a_};
-	glm::vec3 AC{c_-a_};
-	return glm::length(glm::cross(AB,AC))/2;
-};
-
-double Triangle::volume() const {
-	return 0.0f;
-};
-
 std::ostream& Triangle::print(std::ostream& os) const {
 	return Shape::print(os) << "A: (" << a_.x << ", " << a_.y << ", " << a_.z << "), B: (" << b_.x << ", " << b_.y << ", " << b_.z << "), C: (" << c_.x << ", " << c_.y << ", " << c_.z << ")\n";
 };
 
 //M�ller�Trumbore ray-triangle intersection algorithm was used
-std::shared_ptr<Hit>Triangle::intersect(Ray const& ray, glm::vec3& cut_point, glm::vec3& normal) const {
+bool Triangle::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape> shape) const {
 	const float EPSILON = 0.0000001;
 	glm::vec3 a_b, a_c, h, s, q;
 	float a, f, u, v;
@@ -65,16 +55,17 @@ std::shared_ptr<Hit>Triangle::intersect(Ray const& ray, glm::vec3& cut_point, gl
 	if (t > EPSILON) // ray intersection
 	{
 		cut_point = ray.origin + ray.direction * t;
-		float distance{glm::length(cut_point - ray.origin)};
+		distance = glm::length(cut_point - ray.origin);
 		if(cust_normal_){
 			normal = glm::normalize(normal_);
 		} else {
 			normal = glm::normalize(glm::cross(a_b, a_c));
 		}
-		return std::make_shared<Hit>(ray.direction,cut_point,normal,std::make_shared<Shape>(this),distance);
+		shape = std::make_shared<Triangle>(a_, b_, c_, name(), material());
+		return true;
 	}
 	else // This means that there is a line intersection but not a ray intersection.
-		return nullptr;
+		return false;
 };
 
 glm::vec3 Triangle::point_a() const {
@@ -89,7 +80,7 @@ glm::vec3 Triangle::point_c() const {
 	return c_;
 }
 
-std::shared_ptr<Box>Triangle::getBoundingBox()const
+std::shared_ptr<BoundingBox>Triangle::boundingBox()const
 {
 	return boundingBox_;
 }
@@ -100,5 +91,5 @@ void Triangle::calculateBoundingBox()
 	glm::vec3 minBbox{a_};
     glm::vec3 maxBbox{b_+AC};
 
-    boundingBox_= std::make_shared<Box>(minBbox,maxBbox,name()+"BoundingBox",nullptr);
+    boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);
 }

@@ -5,21 +5,18 @@
 #include "color.hpp"
 #include "ray.hpp"
 #include "box.hpp"
-#include "hit.hpp"
 
 class Triangle : public Shape {
 public:
 	Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, std::string name, std::shared_ptr<Material> material);
 	Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 normal, std::string name, std::shared_ptr<Material> material);
 	~Triangle();
-	double area() const override;
-	double volume() const override;
 	std::ostream& print(std::ostream& os) const override;
-	std::shared_ptr<Hit>intersect(Ray const&, glm::vec3&, glm::vec3&) const override;
+	bool intersect(Ray const&, float& ,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>) const override;
 	glm::vec3 point_a() const;
 	glm::vec3 point_b() const;
 	glm::vec3 point_c() const;
-	std::shared_ptr<Box>getBoundingBox()const override;
+	std::shared_ptr<BoundingBox> boundingBox()const override;
 	
 private:
 	glm::vec3 a_;

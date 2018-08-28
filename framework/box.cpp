@@ -14,32 +14,17 @@
 Box::Box(glm::vec3 min, glm::vec3 max, std::string name, std::shared_ptr<Material> material) :
 	Shape{ name, material }, min_{ min }, max_{ max }
 	{
-		boundingBox_ = std::make_shared<Box>(min_,max_,name+" BoundingBox",nullptr);
+		boundingBox_ = std::make_shared<BoundingBox>(min_,max_);
 	};
 
 Box::~Box() {}
-
-double Box::area() const{
-	double x = max_.x - min_.x;
-	double y = max_.y - min_.y;
-	double z = max_.z - min_.z;
-	return 2*x*y + 2*x*z + 2*y*z;
-};
-
-double Box::volume() const{
-	double x = max_.x - min_.x;
-	double y = max_.y - min_.y;
-	double z = max_.z - min_.z;
-	return x*y*z;
-};
 
 std::ostream& Box::print(std::ostream& os) const {
 	return Shape::print(os) << "Min: (" << min_.x << ", " << min_.y << ", " << min_.z << "), Max: (" << max_.x << ", " << max_.y << ", " << max_.z << ")\n";
 };
 
-std::shared_ptr<Hit> Box::intersect(Ray const& ray, glm::vec3& cut_point, glm::vec3& normal) const{
+bool Box::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape> shape) const{
 	
-	std::shared_ptr<Hit> hit = nullptr;
 
 	//Creating the planes that our box consists of
 	Plane plane1{ min_, glm::vec3 { 1,0,0 } };
@@ -117,16 +102,16 @@ std::shared_ptr<Hit> Box::intersect(Ray const& ray, glm::vec3& cut_point, glm::v
 				closest_normal = cut_normals.at(it);
 			}
 		}
-		float distance = glm::length(closest_cut - ray.origin);
+		distance = glm::length(closest_cut - ray.origin);
 		cut_point = closest_cut;
 		normal = closest_normal;
-		hit = std::make_shared<Hit>(ray.direction, cut_point, closest_normal, std::make_shared<Shape>(this), distance);
-		return hit;
+		shape = std::make_shared<Box>(min_, max_, name(), material());
+		return true;
 	}
-	hit;
+	return false;
 };
 
-std::shared_ptr<Box> Box::getBoundingBox()const
+std::shared_ptr<BoundingBox> Box::boundingBox()const
 {
 	return boundingBox_;
 }
