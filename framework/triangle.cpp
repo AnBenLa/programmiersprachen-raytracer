@@ -37,18 +37,18 @@ bool Triangle::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, 
 	a = glm::dot(a_b,h);
 	//the ray is parallel
 	if (a > -EPSILON && a < EPSILON) {
-		return nullptr;
+		return false;
 	}
 	f = 1 / a;
 	s = ray.origin - a_;
 	u = f * (glm::dot(s,h));
 	if (u < 0.0 || u > 1.0) {
-		return nullptr;
+		return false;
 	}
 	q = glm::cross(s,a_b);
 	v = f * glm::dot(ray.direction,q);
 	if (v < 0.0 || u + v > 1.0) {
-		return nullptr;
+		return false;
 	}
 	// At this stage we can compute t to find out where the intersection point is on the line.
 	float t = f * glm::dot(a_c,q);

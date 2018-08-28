@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
   #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
   readSDF_File("C:\\Test.sdf", *scene);
   #else
-  readSDF_File("/home/philipp/Dokumente/Fs2/Programmiersprachen/Fork/programmiersprachen-raytracer/Übung-7/Test.sdf",*scene);
+  readSDF_File("/home/anbenla/raytracer/programmiersprachen-raytracer/Übung-7/Simple-Scene.sdf",*scene);
   #endif
 
   

@@ -13,6 +13,8 @@ Composite::Composite(std::string const& name,std::vector<std::shared_ptr<Shape>>
     updateBoundingBox();
 };
 
+Composite::~Composite(){};
+
 //adds another shape to the composite
 void Composite::add(std::shared_ptr<Shape> const& child)
 {
