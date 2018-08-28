@@ -8,6 +8,7 @@
 
 int main(int argc, char* argv[])
 {
+
 	//TODO Die zu berechnenden Strahlen muessen korrekt berechnet werden.
 	// Die Box intersect Methode muss ueberprueft werden...
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
@@ -27,7 +28,7 @@ int main(int argc, char* argv[])
 
   renderer.render(*scene, 1);
   //create separate thread to see updates of pixels while rendering
-  //std::thread render_thread([&renderer, scene]() {renderer.render(*scene);});
+  //std::thread render_thread([&renderer, scene]() {renderer.render(*scene, 1);});
 
   Window window{{image_width, image_height}};
 

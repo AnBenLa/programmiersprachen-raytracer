@@ -17,6 +17,9 @@ Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, std::string name, std:
 		calculateBoundingBox();
 	};
 
+Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 normal ,std::string name, std::shared_ptr<Material> material) :
+	Shape{ name, material }, a_{ a }, b_{ b }, c_{c}, normal_{normal}, cust_normal_{true} {};
+
 Triangle::~Triangle() {}
 
 double Triangle::area() const {
@@ -63,7 +66,11 @@ bool Triangle::intersect(Ray const& ray, float& g, glm::vec3& cut_point, glm::ve
 	{
 		cut_point = ray.origin + ray.direction * t;
 		g = glm::length(cut_point - ray.origin);
-		normal = glm::normalize(glm::cross(a_b, a_c));
+		if(cust_normal_){
+			normal = glm::normalize(normal_);
+		} else {
+			normal = glm::normalize(glm::cross(a_b, a_c));
+		}
 		return true;
 	}
 	else // This means that there is a line intersection but not a ray intersection.

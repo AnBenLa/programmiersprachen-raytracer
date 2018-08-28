@@ -4,6 +4,8 @@ define material blue    0 0 1 0 0 1 1 1 1 810 	0.9
 define material green   0 1 0 0 1 0 0 1 0 810 	0.9
 define material black   0.2 0.2 0.2 0 0 0 0.2 0.2 0.2 10 0.0
 define material white   0.2 0.2 0.2 1 1 1 0.2 0.2 0.2 10 0.0
+# define mtl C:\\test-2.mtl
+# define obj C:\\test-2.obj
 # geometry
 define shape box chess_row_1_1  	-300	-100 	-100 	-200   	-50 	0 		black
 define shape box chess_row_1_2   	-200	-100 	-100 	-100 	-50 	0	 	white
@@ -50,7 +52,7 @@ define light sun    500 800 0 1.0 1.0 1.0 10
 define light spot1 -500 800 0 0.8 0.8 0.8 10
 ambient 0.1 0.1 0.1
 # camera
-define camera eye 60.0
+define camera eye 30.0
 # camera xform
 transform eye rotate -45 0 1 0
 transform eye translate 100 0 100

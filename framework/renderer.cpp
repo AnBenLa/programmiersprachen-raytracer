@@ -13,6 +13,7 @@
 #include <math.h>
 #include <string>
 #include <chrono>
+#include <ppl.h>
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
   : width_(w)
@@ -27,35 +28,38 @@ void Renderer::render(Scene const& scene, int frames)
 	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
 	double frame_times = 0;
 	for (int i = 0; i < frames;++i) {
-		scene.camera_->position_ = glm::vec3{ 0, 0 , 300 - i };
-		//scene.light_vec_.at(0)->position_ = glm::vec3{ 500,800,i*6 };
+		scene.camera_->position_ = glm::vec3{ 0, 0 , 200 - i };
+		//scene.light_vec_.at(0)->position_ = glm::vec3{ -10,0,10 };
 		auto start = std::chrono::high_resolution_clock::now();
-	
-		for (unsigned y = 0; y < height_; ++y) {
-			if (y == height_ / 4) {
+		int progress = 0;
+
+		Concurrency::parallel_for (std::size_t(0), std::size_t(height_), [&](std::size_t y) {
+			std::cout << y << "\n";
+			if (progress == height_ / 4) {
 				std::cout << "25% - ";
-			} else if (y == height_ / 2) {
+			}
+			else if (progress == height_ / 2) {
 				std::cout << "50% - ";
-			} else if (y == (3 * height_) / 4) {
+			}
+			else if (progress == (3 * height_) / 4) {
 				std::wcout << "75%\n";
 			}
 			for (unsigned x = 0; x < width_; ++x) {
-				
 				Pixel p(x, y);
 				p.color = Color{ 0.2314, 0.5137, 0.7412 };
-				
+
 				//generate the camera ray
 				glm::vec3 pos = scene.camera_->position_;
 				glm::vec3 dir = glm::normalize(scene.camera_->direction_);
 				dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
 				Ray ray{ pos , glm::normalize(dir) };
-				
+
 				//calculate the first shape that gets hit
 				Hit hit = get_closest_hit(scene, ray);
 
 				//if a shape is hit the pixel color is computed
 				if (hit.shape_ != nullptr) {
-					//Color current_color = calculate_depth_map(hit.position_, scene, 600);
+					//Color current_color = calculate_depth_map(hit.position_, scene, 13);
 					Color current_color = calculate_color(hit.shape_, hit.position_, hit.normal_, scene, ray, 3);
 					//tone mapping ???
 					//float tone_r = current_color.r / (current_color.r + 1);
@@ -66,7 +70,8 @@ void Renderer::render(Scene const& scene, int frames)
 				}
 				write(p);
 			}
-		}
+			progress += 1;
+		});
 		auto finish = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = finish - start;
 		double elapsed_s = elapsed.count();
@@ -75,6 +80,7 @@ void Renderer::render(Scene const& scene, int frames)
 		frame_times += elapsed_s;
 		ppm_.save(filename_ + "_" + std::to_string(i) + ".ppm");
 	}
+	
 		std::cout << "Rendertime total: " << frame_times << ", Rendertime per Frame: " << frame_times / frames;
 }
 
@@ -158,10 +164,14 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 			}
 		}
 		if (can_see_light) {
+
 			float o = glm::dot(vec_to_light, glm::normalize(normal));
+			if(o < 0)
+				o = -o;
 			Color i_p = light->color_*light->brightness_;
 			Color k_d = shape->material()->kd;
 			light_colors.push_back(k_d * o *i_p);
+
 		}
 	}
 
@@ -169,6 +179,7 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 		Color clr = light_colors.at(i);
 		comb_clr += clr;
 	}
+
 	return comb_clr;
 }
 
@@ -185,7 +196,7 @@ Color Renderer::calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const
 
 		for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
 			//the cut can be inside the shape so a point outside the shape is calculated by cut + 0.1f*normal
-			bool cuts_shape = shape_ptr->intersect(Ray{ cut + 0.5f*normal,vec_to_light }, distance, cut_point, normal_new);
+			bool cuts_shape = shape_ptr->intersect(Ray{ cut + 0.01f*normal,vec_to_light }, distance, cut_point, normal_new);
 			if (cuts_shape) {
 				can_see_light = false;
 				break;
@@ -195,7 +206,10 @@ Color Renderer::calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const
 			float m = shape->material()->m;
 			glm::vec3 v = glm::normalize(scene.camera_->position_ - cut);
 			glm::vec3 r = glm::dot(normal,vec_to_light)*2.0f*normal-vec_to_light;
-			float cos = pow(glm::dot(r,v), m);
+			float p = glm::dot(r,v);
+			if(p < 0)
+				p = -p;
+			float cos = pow(p, m);
 			float m_pi = (m + 2) / (2 * M_PI);
 			Color i_p = light->color_*light->brightness_;
 			Color k_s = shape->material()->ks;
@@ -207,6 +221,7 @@ Color Renderer::calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const
 		Color clr = light_colors.at(i);
 		comb_clr += clr;
 	}
+
 	return comb_clr;
 }
 
