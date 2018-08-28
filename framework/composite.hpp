@@ -24,15 +24,14 @@ class Composite : Shape
         //getter
         std::vector<std::shared_ptr<Shape>>& getShapes(std::vector<std::shared_ptr<Shape>>& shapes);
         std::shared_ptr<BoundingBox> boundingBox()const;
-        std::string name()const;
+
+		//calculates bounding box for the whole composite for performance
+		void updateBoundingBox();
 
     private:
 
         std::vector<std::shared_ptr<Shape>>shapes_;
         std::vector<std::shared_ptr<Composite>>composites_;
-    
-        //calculates bounding box for the whole composite for performance
-        void updateBoundingBox(); 
 };
 
 #endif

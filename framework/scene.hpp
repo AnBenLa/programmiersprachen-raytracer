@@ -100,6 +100,7 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 		std::vector<glm::vec3> normal_vertices;
 		std::shared_ptr<Material> current_material;
 		std::shared_ptr<Composite> current_comp = nullptr;
+		std::string current_name;
 		while(std::getline(ifs,line)){
 			std::vector<std::string> lineParts;
 			std::stringstream iss(line);
@@ -112,10 +113,12 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 				if (lineParts[0] == "o") {
 					std::string name = lineParts[1];
 					if (current_comp != nullptr) {
+						current_comp->updateBoundingBox();
 						obj_comp->add(current_comp);
-						std::cout << "Comp: " << current_comp->name() << " was added\n";
+						std::cout << "Comp: " << current_name << " was added\n";
 					}
 					current_comp = std::make_shared<Composite>(name);
+					current_name = name;
 				}
 				if(lineParts[0] == "usemtl"){
 					current_material = scene.mat_map_.at(lineParts[1]);
@@ -176,8 +179,9 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 			}
 		}
 		if (current_comp != nullptr) {
+			current_comp->updateBoundingBox();
 			obj_comp->add(current_comp);
-			std::cout << "Comp: " << current_comp->name() << " was added\n";
+			std::cout << "Comp: " << current_name << " was added\n";
 		}
 		std::cout << vertices.size() << " vertices loaded\n";
 		std::cout << shapes << " faces loaded\n";
@@ -185,8 +189,8 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 	}
 }
 
-static void deserializeObjects(Scene& scene, std::string line, std::map<std::string,std::shared_ptr<Shape>> shape_map, 
-	std::map<std::string, std::shared_ptr<Composite>> composite_map, std::shared_ptr<Composite> obj_comp){
+static void deserializeObjects(Scene& scene, std::string line, std::map<std::string,std::shared_ptr<Shape>>& shape_map, 
+	std::map<std::string, std::shared_ptr<Composite>>& composite_map, std::shared_ptr<Composite>& obj_comp){
 	std::vector<std::string> lineParts;
 	std::stringstream iss(line);
 	std::string word;
@@ -313,7 +317,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					std::string name = lineParts[3];
 					std::vector<std::shared_ptr<Shape>> shapes;
 					std::vector<std::shared_ptr<Composite>> composites;
-					for (int i = 3; i < lineParts.size(); ++i) {
+					for (int i = 4; i < lineParts.size(); ++i) {
 						std::string current_shape = lineParts[i];
 						if (shape_map.find(current_shape) != shape_map.end()) {
 							shapes.push_back(shape_map.at(current_shape));
@@ -328,7 +332,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					if (name == "root") {
 						scene.root_composite_ = composite;
 					}
-					std::cout << "Composite: " << composite << "\n";
+					std::cout << "Composite: " << name << "\n\n";
 				}
 				catch (std::invalid_argument arg)
 				{

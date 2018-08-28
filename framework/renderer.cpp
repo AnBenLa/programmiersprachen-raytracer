@@ -13,7 +13,7 @@
 #include <math.h>
 #include <string>
 #include <chrono>
-//#include <ppl.h>
+#include <ppl.h>
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
   : width_(w)
@@ -33,8 +33,8 @@ void Renderer::render(Scene const& scene, int frames)
 		auto start = std::chrono::high_resolution_clock::now();
 		int progress = 0;
 		
-		//Concurrency::parallel_for(std::size_t(0), std::size_t(height_), [&](std::size_t y) {
-		for(int y = 0; y < height_; ++y){
+		Concurrency::parallel_for(std::size_t(0), std::size_t(height_), [&](std::size_t y) {
+		//for(int y = 0; y < height_; ++y){
 			if (progress == height_ / 4) {
 				std::cout << "25% - ";
 			} else if (progress == height_ / 2) {
@@ -74,8 +74,8 @@ void Renderer::render(Scene const& scene, int frames)
 				write(p);
 			}
 			progress += 1;
-		//});
-		}
+		});
+		//}
 		auto finish = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = finish - start;
 		double elapsed_s = elapsed.count();

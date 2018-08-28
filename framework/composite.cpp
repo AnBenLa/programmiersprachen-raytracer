@@ -19,18 +19,11 @@ Composite::~Composite(){};
 void Composite::add(std::shared_ptr<Shape> const& child)
 {
     shapes_.push_back(child);
-    updateBoundingBox();
 }
 
 void Composite::add(std::shared_ptr<Composite> const& child)
 {
     composites_.push_back(child);
-    updateBoundingBox();
-}
-
-std::string Composite::name()const
-{
-    return name();
 }
 
 bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cut_point, glm::vec3& normal_vec, std::shared_ptr<Shape> shape)const
