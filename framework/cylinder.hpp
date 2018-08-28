@@ -28,6 +28,5 @@ class Cylinder : public Shape
         glm::vec3 top_;
         double radius_;
         void calculateBoundingBox();
-
 };
 #endif

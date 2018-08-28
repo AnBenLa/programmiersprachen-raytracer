@@ -1,5 +1,6 @@
 #include <glm/vec3.hpp>
-#include <glm/gtx/norm.hpp>
+#include <glm/gtx/norm.hpp>    
+#include <glm/gtx/intersect.hpp>
 #include <string>
 
 #include "shape.hpp"
@@ -38,7 +39,6 @@ std::ostream& Cylinder::print(std::ostream& os) const {
 std::shared_ptr<Hit> Cylinder::intersect(Ray const& ray, glm::vec3& cut_point, glm::vec3& normal)const
 {
     //check intersection with infinite cylinder
-    //used idea of https://www.gamedev.net/forums/topic/467789-raycylinder-intersection/
     glm::vec3 AB = base_ - top_;
     glm::vec3 AO = ray.origin - base_;
     glm::vec3 AOxAB = glm::cross(AB,AO);
@@ -47,8 +47,6 @@ std::shared_ptr<Hit> Cylinder::intersect(Ray const& ray, glm::vec3& cut_point, g
     float a = glm::dot(VxAB,VxAB);
     float b = 2*glm::dot(VxAB,AOxAB);
     float c = glm::dot(AOxAB,AOxAB)-(radius_*radius_*ab2);
-
-    float distance;
 
     //solve quadratic equation
     float p = pow(b,2)-4*a*c;
@@ -60,15 +58,28 @@ std::shared_ptr<Hit> Cylinder::intersect(Ray const& ray, glm::vec3& cut_point, g
     else{
         float x1 = (-b+sqrt(p))/2*a;
         float x2 = (-b-sqrt(p))/2*a;
-        //if x1=x2 quadratic equation has only one result (tangent)
-        return std::make_shared<Hit>(ray.direction,cut_point,normal,std::make_shared<Shape>(this),distance);
+    
+        float x{0.0f};
+        if(x1<x2){
+            float x=x1;
+        }
+        else {float x = x2;}
+        cut_point = ray.origin+ray.direction*x;
+
+        //check if the intersection is between planes (bottom/top)
+        float cut_distance1;
+        float cut_distance2;
+        glm::intersectRayPlane(cut_point,glm::normalize(AB),base_,AB,cut_distance1);
+        glm::intersectRayPlane(cut_point,glm::normalize(AB),top_,AB,cut_distance2);
+        cut_distance1 = glm::length(base_+AB*cut_distance1);
+        cut_distance2 = glm::length(top_+AB*cut_distance2);
+
+        if(cut_distance1+cut_distance2<=glm::length(AB))
+        {
+            return std::make_shared<Hit>(ray.direction,cut_point,normal,std::make_shared<Shape>(this),glm::length(cut_point-ray.origin));
+        }   
+        else return nullptr;    
     }
-
-    //check if the intersection is between planes (bottom/top)
-
-
-    //check for intersection with planes (base)
-
 }
 
 void Cylinder::calculateBoundingBox()

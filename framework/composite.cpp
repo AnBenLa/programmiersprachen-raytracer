@@ -38,10 +38,9 @@ std::shared_ptr<Hit> Composite::intersect(Ray const& incoming_ray,glm::vec3& cut
     std::shared_ptr<Hit>closestIntersection{nullptr};
     
     //first check BoundingBox intersection, then children intersection
-    if(boundingBox_->intersect(incoming_ray,cut_point,normal_vec))
+    if(boundingBox_->intersect(incoming_ray,cut_point,normal_vec)!=nullptr)
     {
         //check composites for intersection
-
         for(std::shared_ptr<Composite> child : composites_)
         {
             std::shared_ptr<Hit>currentHit = child->intersect(incoming_ray,cut_point,normal_vec);
@@ -55,7 +54,6 @@ std::shared_ptr<Hit> Composite::intersect(Ray const& incoming_ray,glm::vec3& cut
         }
         
         //check shapes for intersection
-
         for(std::shared_ptr<Shape> child : shapes_)
         {
             std::shared_ptr<Hit>currentHit = child->intersect(incoming_ray,cut_point,normal_vec);
