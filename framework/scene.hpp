@@ -17,11 +17,12 @@
 #include "cylinder.hpp"
 #include "camera.hpp"
 #include "light.hpp"
+#include "composite.hpp"
 #include "ambiente.hpp"
 
 struct Scene {
 	std::map<std::string, std::shared_ptr<Material>> mat_map_;
-	std::vector<std::shared_ptr<Shape>> shape_vec_;
+	std::shared_ptr<Composite> root_composite_;
 	std::vector<std::shared_ptr<Light>> light_vec_;
 	std::shared_ptr<Ambiente> ambiente_;
 	std::shared_ptr<Camera> camera_;
@@ -85,7 +86,7 @@ static void readMTL_File(std::string const& path, Scene& scene){
 	}
 }
 
-static void readOBJ_File(std::string const& path, Scene& scene){
+static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<Composite> obj_comp){
 	std::ifstream ifs;
 	int shapes = 0;
 	ifs.open(path);
@@ -98,6 +99,7 @@ static void readOBJ_File(std::string const& path, Scene& scene){
 		std::vector<glm::vec3> vertices;
 		std::vector<glm::vec3> normal_vertices;
 		std::shared_ptr<Material> current_material;
+		std::shared_ptr<Composite> current_comp;
 		while(std::getline(ifs,line)){
 			std::vector<std::string> lineParts;
 			std::stringstream iss(line);
@@ -107,6 +109,14 @@ static void readOBJ_File(std::string const& path, Scene& scene){
 				lineParts.push_back(word);
 			}
 			if(lineParts.size() > 1){
+				if (lineParts[0] == "0") {
+					std::string name = lineParts[1];
+					if (current_comp != nullptr) {
+						obj_comp->add(current_comp);
+						std::cout << "Comp: " << current_comp->name() << " was added\n";
+					}
+					current_comp = std::make_shared<Composite>(name);
+				}
 				if(lineParts[0] == "usemtl"){
 					current_material = scene.mat_map_.at(lineParts[1]);
 				}
@@ -139,8 +149,8 @@ static void readOBJ_File(std::string const& path, Scene& scene){
 
 						std::shared_ptr<Triangle> tri_1 = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v2), vertices.at(v3), normal_vertices.at(normal),"generic", current_material);
 						std::shared_ptr<Triangle> tri_2 = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v4), vertices.at(v3), normal_vertices.at(normal), "generic", current_material);
-						scene.shape_vec_.push_back(tri_1);
-						scene.shape_vec_.push_back(tri_2);
+						current_comp->add(tri_1);
+						current_comp->add(tri_2);
 						shapes += 1;
 					} else if(lineParts.size() == 4){
 						std::string v_1 = lineParts[1];
@@ -159,11 +169,15 @@ static void readOBJ_File(std::string const& path, Scene& scene){
 
 
 						std::shared_ptr<Triangle> tri = std::make_shared<Triangle>(vertices.at(v1), vertices.at(v2), vertices.at(v3), normal_vertices.at(normal),"generic", current_material);
-						scene.shape_vec_.push_back(tri);
+						current_comp->add(tri);
 						shapes +=1;
 					}
 				}
 			}
+		}
+		if (current_comp != nullptr) {
+			obj_comp->add(current_comp);
+			std::cout << "Comp: " << current_comp->name() << " was added\n";
 		}
 		std::cout << vertices.size() << " vertices loaded\n";
 		std::cout << shapes << " faces loaded\n";
@@ -171,7 +185,8 @@ static void readOBJ_File(std::string const& path, Scene& scene){
 	}
 }
 
-static void deserializeObjects(Scene& scene, std::string line){
+static void deserializeObjects(Scene& scene, std::string line, std::map<std::string,std::shared_ptr<Shape>> shape_map, 
+	std::map<std::string, std::shared_ptr<Composite>> composite_map, std::shared_ptr<Composite> obj_comp){
 	std::vector<std::string> lineParts;
 	std::stringstream iss(line);
 	std::string word;
@@ -216,7 +231,7 @@ static void deserializeObjects(Scene& scene, std::string line){
 					glm::vec3 max = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[10]);
 					std::shared_ptr<Box> box = std::make_shared<Box>(min, max, name, mat);
-					scene.shape_vec_.push_back(box);
+					shape_map.insert<name,box>;
 					std::cout << "Box: " << *box << "\n";
 				}
 				catch (std::invalid_argument arg)
@@ -232,7 +247,7 @@ static void deserializeObjects(Scene& scene, std::string line){
 					int radius = std::stof(lineParts[7], NULL);
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[8]);
 					std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(center, radius, name, mat);
-					scene.shape_vec_.push_back(sphere);
+					shape_map.insert<name, sphere>;
 					std::cout << "Sphere: " << *sphere << "\n";
 				}
 				catch (std::invalid_argument arg)
@@ -249,7 +264,7 @@ static void deserializeObjects(Scene& scene, std::string line){
 					glm::vec3 c = glm::vec3{ std::stof(lineParts[10], NULL), std::stof(lineParts[11], NULL), std::stof(lineParts[12], NULL) };
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[13]);
 					std::shared_ptr<Triangle> triangle = std::make_shared<Triangle>(a, b,  c,name, mat);
-					scene.shape_vec_.push_back(triangle);
+					shape_map.insert<name, triangle>;
 					std::cout << "Triangle: " << *triangle << "\n";
 				}
 				catch (std::invalid_argument arg)
@@ -266,7 +281,7 @@ static void deserializeObjects(Scene& scene, std::string line){
 					float radius = std::stof(lineParts[10], NULL);
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
 					std::shared_ptr<Cone> cone = std::make_shared<Cone>(base, peak, radius, name, mat);
-					scene.shape_vec_.push_back(cone);
+					shape_map.insert<name, cone>;
 					std::cout << "Cone: " << *cone << "\n";
 				}
 				catch (std::invalid_argument arg)
@@ -275,7 +290,6 @@ static void deserializeObjects(Scene& scene, std::string line){
 					std::cout << "Throws exception : " << arg.what() << "\n";
 				}
 			}
-
 			if(lineParts[2] == "cylinder")
 			{
 				try{
@@ -285,13 +299,42 @@ static void deserializeObjects(Scene& scene, std::string line){
 					float radius = std::stof(lineParts[10],NULL);
 					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
 					std::shared_ptr<Cylinder>cylinder = std::make_shared<Cylinder>(base,top,radius,name,mat);
-					scene.shape_vec_.push_back(cylinder);
+					shape_map.insert<name, cylinder>;
 					std::cout<<"Cylinder: "<<*cylinder<<"\n";
 				}
 				catch (std::invalid_argument arg)
 				{
 					std::cout<<"Something went wrong, while loading the cylinder. Check format!\n";
 					std::cout<<"Throws exception: "<<arg.what()<<"\n";
+				}
+			}
+			if (lineParts[2] == "composite")
+			{
+				try {
+					std::string name = lineParts[3];
+					std::vector<std::shared_ptr<Shape>> shapes;
+					std::vector<std::shared_ptr<Composite>> composites;
+					for (int i = 3; i < lineParts.size(); ++i) {
+						std::string current_shape = lineParts[i];
+						if (shape_map.find(current_shape) != shape_map.end()) {
+							shapes.push_back(shape_map.at(current_shape));
+						} else if (composite_map.find(current_shape) != composite_map.end()) {
+							composites.push_back(composite_map.at(current_shape));
+						} else {
+							std::cout << "the composite could not be added correctly";
+						}
+					}
+					std::shared_ptr<Composite> composite = std::make_shared<Composite>(name, shapes, composites);
+					composite_map.insert<name, composite>;
+					if (name == "root") {
+						scene.root_composite_ = composite;
+					}
+					std::cout << "Composite: " << composite << "\n";
+				}
+				catch (std::invalid_argument arg)
+				{
+					std::cout << "Something went wrong, while loading the ccomposite. Check format!\n";
+					std::cout << "Throws exception: " << arg.what() << "\n";
 				}
 			}
 
@@ -337,7 +380,7 @@ static void deserializeObjects(Scene& scene, std::string line){
 		}
 		if(lineParts[1] == "obj"){
 			std::string path = lineParts[2];
-			readOBJ_File(path, scene);
+			readOBJ_File(path, scene, obj_comp);
 		}
 	}
 	if (lineParts[0] == "ambient") {
@@ -366,8 +409,17 @@ static void readSDF_File(std::string const& path,Scene& scene) {
 	else {
 		std::cout << "\nOpened OK\n-----------------------------------------------------------------------------------------\n" << std::endl;
 		std::string line;
+		std::map<std::string, std::shared_ptr<Shape>> shape_map;
+		std::map<std::string, std::shared_ptr<Composite>> composite_map;
+		std::shared_ptr<Composite> obj_comp = std::make_shared<Composite>();
 		while(std::getline(ifs,line)){
-			deserializeObjects(scene, line);
+			deserializeObjects(scene, line, shape_map, composite_map, obj_comp);
+		}
+		if (scene.root_composite_ != nullptr) {
+			scene.root_composite_->add(obj_comp);
+		}
+		else {
+			scene.root_composite_ = obj_comp;
 		}
 		std::cout << "\nScene loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;
 	}

@@ -1,14 +1,17 @@
 #ifndef SHAPE_HEADER
 #define SHAPE_HEADER
-#include "color.hpp"
-#include "ray.hpp"
-#include "material.hpp"
-#include "light.hpp"
 #include <string>
 #include <glm/glm.hpp>
 #include <memory>
 #include <iostream>
 #include <tuple>
+
+#include "color.hpp"
+#include "ray.hpp"
+#include "material.hpp"
+#include "hit.hpp"
+#include "light.hpp"
+#include "box.hpp"
 
 class Shape {
 public:
@@ -17,8 +20,8 @@ public:
 	virtual double area() const = 0;
 	virtual double volume() const = 0;
 	virtual std::ostream& print(std::ostream& os) const;
-	virtual std::shared_ptr<Hit>intersect(Ray const& incoming_ray, glm::vec3& cut_point, glm::vec3& normal_vec) const = 0;
-	virtual std::shared_ptr<Box>getBoundingBox()const = 0;
+	virtual std::shared_ptr<Hit> intersect(Ray const& incoming_ray, glm::vec3& cut_point, glm::vec3& normal_vec) const = 0;
+	virtual std::shared_ptr<Box> getBoundingBox()const = 0;
 	std::string name() const;
 	std::shared_ptr<Material> material() const;
 
