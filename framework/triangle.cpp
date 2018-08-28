@@ -12,16 +12,20 @@
 
 
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, std::string name, std::shared_ptr<Material> material) :
-	Shape{ name, material }, a_{ a }, b_{ b }, c_{c} {};
+	Shape{ name, material }, a_{ a }, b_{ b }, c_{c} 
+	{
+		calculateBoundingBox();
+	};
 
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 normal ,std::string name, std::shared_ptr<Material> material) :
 	Shape{ name, material }, a_{ a }, b_{ b }, c_{c}, normal_{normal}, cust_normal_{true} {};
 
 Triangle::~Triangle() {}
 
-//not implemented yet
 double Triangle::area() const {
-	return 0.0f;
+	glm::vec3 AB{b_-a_};
+	glm::vec3 AC{c_-a_};
+	return glm::length(glm::cross(AB,AC))/2;
 };
 
 double Triangle::volume() const {
@@ -85,3 +89,16 @@ glm::vec3 Triangle::point_c() const {
 	return c_;
 }
 
+std::shared_ptr<Box>Triangle::getBoundingBox()const
+{
+	return boundingBox_;
+}
+
+void Triangle::calculateBoundingBox()
+{
+	glm::vec3 AC{c_-a_};
+	glm::vec3 minBbox{a_};
+    glm::vec3 maxBbox{b_+AC};
+
+    boundingBox_= std::make_shared<Box>(minBbox,maxBbox,name()+"BoundingBox",nullptr);
+}

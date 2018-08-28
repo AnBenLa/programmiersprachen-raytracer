@@ -9,5 +9,12 @@ struct Hit {
 	glm::vec3 position_;
 	glm::vec3 normal_;
 	std::shared_ptr<Shape> shape_;
+	float distance_;
 };
+
+bool operator < (std::shared_ptr<Hit> const& hit1,std::shared_ptr<Hit> const& hit2)
+{
+	return hit1->distance_<hit2->distance_;
+}
+
 #endif

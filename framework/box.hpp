@@ -6,6 +6,7 @@
 #include "ray.hpp"
 
 class Box : public Shape {
+
 public:
 	Box(glm::vec3 min, glm::vec3 max, std::string name, std::shared_ptr<Material> material);
 	~Box();
@@ -15,6 +16,8 @@ public:
 	bool intersect(Ray const&, float& r, glm::vec3&, glm::vec3&) const override;
 	glm::vec3 min() const;
 	glm::vec3 max() const;
+	std::shared_ptr<Box>getBoundingBox()const override;
+
 private:
 	glm::vec3 min_;
 	glm::vec3 max_;

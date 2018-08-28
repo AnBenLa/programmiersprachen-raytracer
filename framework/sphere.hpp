@@ -15,8 +15,11 @@ public:
 	bool intersect(Ray const&, float&, glm::vec3&, glm::vec3&) const override;
 	glm::vec3 center() const;
 	double radius() const;
+	std::shared_ptr<Box>getBoundingBox()const override;
+
 private:
 	glm::vec3 center_;
 	double radius_;
+	void calculateBoundingBox();
 };
 #endif
