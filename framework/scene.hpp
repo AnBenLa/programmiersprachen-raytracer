@@ -114,7 +114,7 @@ static void readOBJ_File(std::string const& path, Scene& scene){
 					vertices.push_back(vertex);
 				}
 				if(lineParts[0] == "vn"){
-					glm::vec3 vertex = glm::vec3{stof(lineParts[1]), stof(lineParts[2]), stof(lineParts[3])};
+					glm::vec3 vertex = glm::vec3{stof(lineParts[1]), -stof(lineParts[3]), stof(lineParts[2])};
 					normal_vertices.push_back(vertex);
 				}
 				if(lineParts[0] == "f"){
