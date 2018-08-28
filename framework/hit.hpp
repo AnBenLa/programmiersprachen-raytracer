@@ -3,7 +3,7 @@
 #include <glm/vec3.hpp>
 #include "shape.hpp"
 struct Hit {
-	Hit(glm::vec3 incoming_vec, glm::vec3 position, glm::vec3 normal, std::shared_ptr<Shape> shape) : incoming_vec_(incoming_vec), position_(position), normal_(normal), shape_(shape){}
+	Hit(glm::vec3 incoming_vec, glm::vec3 position, glm::vec3 normal, std::shared_ptr<Shape> shape, float distance) : incoming_vec_(incoming_vec), position_(position), normal_(normal), shape_(shape), distance_(distance){}
 
 	glm::vec3 incoming_vec_;
 	glm::vec3 position_;
