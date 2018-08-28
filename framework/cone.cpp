@@ -58,10 +58,10 @@ bool Cone::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm:
 			shape = std::make_shared<Shape>(this);
 			return true;
 		}
-		return false;
+		return nullptr;
 
 	} 
-	return false;
+	return nullptr;
 };
 
 glm::vec3 Cone::peak() const {
