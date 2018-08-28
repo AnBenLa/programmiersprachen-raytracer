@@ -31,7 +31,7 @@ double Cylinder::volume()const
 }
 
 std::ostream& Cylinder::print(std::ostream& os) const {
-	return Shape::print(os)<<"Origin: ("<<base_.x<<","<<base_.y<<"), "<<"Height: ("<<top_.x<<","<<top_.y<<"), "<<"Radius: "<<radius_<<"\n";
+	return Shape::print(os)<<"Base: ("<<base_.x<<","<<base_.y<<","<<base_.z<<"), "<<"Top: ("<<top_.x<<","<<top_.y<<","<<top_.z<<"), "<<"Radius: "<<radius_<<"\n";
 }
 
 //not ready yet

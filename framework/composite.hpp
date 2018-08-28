@@ -17,7 +17,7 @@ class Composite
         
         void add(std::shared_ptr<Shape>const& child);
         void add(std::shared_ptr<Composite>const& child);
-        bool intersect(Ray const& incoming_ray, float& distance, glm::vec3& cut_point, glm::vec3& normal_vec)const;
+        std::shared_ptr<Hit> intersect(Ray const& incoming_ray,glm::vec3& cut_point, glm::vec3& normal_vec)const;
         std::ostream& print(std::ostream& os)const;
         
         //getter

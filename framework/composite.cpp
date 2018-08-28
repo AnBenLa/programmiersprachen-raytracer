@@ -1,5 +1,6 @@
 #include "composite.hpp"
 #include <algorithm>
+#include <hit.hpp>
 
 Composite::Composite(std::string const& name):
     name_{name}
@@ -10,7 +11,9 @@ Composite::Composite(std::string const& name,std::vector<std::shared_ptr<Shape>>
     shapes_{shapes},
     composites_{composites},
     boundingBox_{nullptr}
-{};
+{
+    updateBoundingBox();
+};
 
 //adds another shape to the composite
 void Composite::add(std::shared_ptr<Shape> const& child)
@@ -30,38 +33,42 @@ std::string Composite::name()const
     return name_;
 }
 
-bool Composite::intersect(Ray const& incoming_ray, float& distance, glm::vec3& cut_point, glm::vec3& normal_vec)const
+std::shared_ptr<Hit> Composite::intersect(Ray const& incoming_ray,glm::vec3& cut_point, glm::vec3& normal_vec)const
 {
-    bool intersection = false;
+    std::shared_ptr<Hit>closestIntersection{nullptr};
     
     //first check BoundingBox intersection, then children intersection
-    if(boundingBox_->intersect(incoming_ray,distance,cut_point,normal_vec))
+    if(boundingBox_->intersect(incoming_ray,cut_point,normal_vec))
     {
         //check composites for intersection
-        if(!composites_.empty())
+
+        for(std::shared_ptr<Composite> child : composites_)
         {
-            for(std::shared_ptr<Composite> child : composites_)
+            std::shared_ptr<Hit>currentHit = child->intersect(incoming_ray,cut_point,normal_vec);
+            if(currentHit!=nullptr)
             {
-                if(child->intersect(incoming_ray,distance,cut_point,normal_vec))
+                if(currentHit<closestIntersection)
                 {
-                    intersection = true;
-                }
+                    closestIntersection = currentHit;
+                };
             }
         }
         
         //check shapes for intersection
-        if(!shapes_.empty())
+
+        for(std::shared_ptr<Shape> child : shapes_)
         {
-            for(std::shared_ptr<Shape> child : shapes_)
+            std::shared_ptr<Hit>currentHit = child->intersect(incoming_ray,cut_point,normal_vec);
+            if(currentHit!=nullptr)
             {
-                if(child->intersect(incoming_ray,distance,cut_point,normal_vec))
+                if(currentHit<closestIntersection)
                 {
-                    intersection = true;
-                }
-            }
+                    closestIntersection = currentHit;
+                };
+            }          
         }
     }
-    return intersection;    
+    return closestIntersection;    
 }
 
 std::vector<std::shared_ptr<Shape>>& Composite::getShapes(std::vector<std::shared_ptr<Shape>>& shapes)
