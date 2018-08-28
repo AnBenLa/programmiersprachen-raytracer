@@ -66,10 +66,10 @@ std::shared_ptr<Hit> Cone::intersect(Ray const& ray, glm::vec3& cut_point, glm::
 			normal = glm::normalize(p);
 			return std::make_shared<Hit>(ray.direction,cut_point,normal,std::make_shared<Shape>(this),distance);
 		}
-		return false;
+		return nullptr;
 
 	} 
-	return false;
+	return nullptr;
 };
 
 glm::vec3 Cone::peak() const {
