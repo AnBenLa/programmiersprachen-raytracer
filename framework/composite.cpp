@@ -26,7 +26,7 @@ void Composite::add(std::shared_ptr<Composite> const& child)
     composites_.push_back(child);
 }
 
-bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cut_point, glm::vec3& normal_vec, std::shared_ptr<Shape> shape)const
+bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cut_point, glm::vec3& normal_vec, std::shared_ptr<Shape>& shape)const
 {
 	float closest_distance = 0.0f;
 	std::shared_ptr<Shape> closest_shape;
@@ -66,7 +66,7 @@ bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cu
             {
                 if(current_dist < closest_distance || !first_dist_set)
                 {
-					closest_shape = current_shape;
+					closest_shape = child;
 					closest_distance = current_dist;
 					closest_normal = current_norm;
 					closest_cut = current_cut;
@@ -142,34 +142,40 @@ void Composite::updateBoundingBox()
         boundingBoxes.push_back(child->boundingBox());
     }
 
+	glm::vec3 min_bbox;
+	glm::vec3 max_bbox;
 
     //get box_min
-    glm::vec3 min_bbox;
-    std::sort(boundingBoxes.begin(),boundingBoxes.end(),[](std::shared_ptr<BoundingBox> box1,std::shared_ptr<BoundingBox> box2)
-    ->bool{return box1->min_.x<box2->min_.x;});
-    min_bbox.x = (*boundingBoxes.begin())->min_.x;
+	if (boundingBoxes.size() > 1) {
+		
+		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
+			->bool {return box1->min_.x < box2->min_.x; });
+		min_bbox.x = (*boundingBoxes.begin())->min_.x;
 
-    std::sort(boundingBoxes.begin(),boundingBoxes.end(),[](std::shared_ptr<BoundingBox> box1,std::shared_ptr<BoundingBox> box2)
-    ->bool{return box1->min_.y<box2->min_.y;});
-    min_bbox.y = (*boundingBoxes.begin())->min_.y;
+		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
+			->bool {return box1->min_.y < box2->min_.y; });
+		min_bbox.y = (*boundingBoxes.begin())->min_.y;
 
-    std::sort(boundingBoxes.begin(),boundingBoxes.end(),[](std::shared_ptr<BoundingBox> box1,std::shared_ptr<BoundingBox> box2)
-    ->bool{return box1->min_.z<box2->min_.z;});
-    min_bbox.z = (*boundingBoxes.begin())->min_.z;
+		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
+			->bool {return box1->min_.z < box2->min_.z; });
+		min_bbox.z = (*boundingBoxes.begin())->min_.z;
 
-    //get box max
-    glm::vec3 max_bbox;
-    std::sort(boundingBoxes.begin(),boundingBoxes.end(),[](std::shared_ptr<BoundingBox> box1,std::shared_ptr<BoundingBox> box2)
-    ->bool{return box1->max_.x<box2->max_.x;});
-    max_bbox.x = (*boundingBoxes.begin())->max_.x;
+		//get box max
+		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
+			->bool {return box1->max_.x < box2->max_.x; });
+		max_bbox.x = (*boundingBoxes.begin())->max_.x;
 
-    std::sort(boundingBoxes.begin(),boundingBoxes.end(),[](std::shared_ptr<BoundingBox> box1,std::shared_ptr<BoundingBox> box2)
-    ->bool{return box1->max_.y<box2->max_.y;});
-    max_bbox.y = (*boundingBoxes.begin())->max_.y;
+		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
+			->bool {return box1->max_.y < box2->max_.y; });
+		max_bbox.y = (*boundingBoxes.begin())->max_.y;
 
-    std::sort(boundingBoxes.begin(),boundingBoxes.end(),[](std::shared_ptr<BoundingBox> box1,std::shared_ptr<BoundingBox> box2)
-    ->bool{return box1->max_.z<box2->max_.z;});
-    max_bbox.z = (*boundingBoxes.begin())->max_.z;
-
+		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
+			->bool {return box1->max_.z < box2->max_.z; });
+		max_bbox.z = (*boundingBoxes.begin())->max_.z;
+	}
+	else {
+		min_bbox = boundingBoxes.at(0)->min_;
+		max_bbox = boundingBoxes.at(0)->max_;
+	}
     boundingBox_ = std::make_shared<BoundingBox>(min_bbox,max_bbox);
 }

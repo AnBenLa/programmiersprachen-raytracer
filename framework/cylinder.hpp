@@ -12,7 +12,7 @@ class Cylinder : public Shape
         Cylinder(glm::vec3 const& base,glm::vec3 const& top,double radius,std::string const& name,std::shared_ptr<Material> const& material);
         ~Cylinder();
         std::ostream& print(std::ostream& os)const override;
-        bool intersect(Ray const& ray, float& ,glm::vec3&,glm::vec3&, std::shared_ptr<Shape>)const override;
+        bool intersect(Ray const& ray, float& ,glm::vec3&,glm::vec3&, std::shared_ptr<Shape>&)const override;
 
         //getter
         glm::vec3 top() const;

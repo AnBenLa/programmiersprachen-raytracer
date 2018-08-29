@@ -17,7 +17,7 @@ public:
 	Shape(std::string const& name, std::shared_ptr<Material> const& material);
 	~Shape();
 	virtual std::ostream& print(std::ostream& os) const;
-	virtual bool intersect(Ray const& incoming_ray, float& distance, glm::vec3& cut_point, glm::vec3& normal_vec, std::shared_ptr<Shape> shape) const = 0;
+	virtual bool intersect(Ray const& incoming_ray, float& distance, glm::vec3& cut_point, glm::vec3& normal_vec, std::shared_ptr<Shape>& shape) const = 0;
 	virtual std::shared_ptr<BoundingBox> boundingBox()const = 0;
 	std::string name() const;
 	std::shared_ptr<Material> material() const;

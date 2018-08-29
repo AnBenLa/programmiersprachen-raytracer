@@ -12,7 +12,7 @@ public:
 	Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 normal, std::string name, std::shared_ptr<Material> material);
 	~Triangle();
 	std::ostream& print(std::ostream& os) const override;
-	bool intersect(Ray const&, float& ,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>) const override;
+	bool intersect(Ray const&, float& ,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>&) const override;
 	glm::vec3 point_a() const;
 	glm::vec3 point_b() const;
 	glm::vec3 point_c() const;

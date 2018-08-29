@@ -22,7 +22,7 @@ std::ostream& Sphere::print(std::ostream& os) const {
 	return Shape::print(os) << "Center: (" << center_.x << ", " << center_.y << ", " << center_.z << "), Radius: (" << radius_ << ")\n";
 };
 
-bool Sphere::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape> shape) const {
+bool Sphere::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape>& shape) const {
 	bool hit_found = glm::intersectRaySphere(ray.origin, glm::normalize(ray.direction), center_, radius_, cut_point , normal);
 	if (hit_found) {
 		distance = glm::length(cut_point - ray.origin);

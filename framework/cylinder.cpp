@@ -26,7 +26,7 @@ std::ostream& Cylinder::print(std::ostream& os) const {
 }
 
 //not ready yet
-bool Cylinder::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape> shape)const
+bool Cylinder::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape>& shape)const
 {
     //check intersection with infinite cylinder
     glm::vec3 AB = base_ - top_;

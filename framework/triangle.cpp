@@ -29,7 +29,7 @@ std::ostream& Triangle::print(std::ostream& os) const {
 };
 
 //M�ller�Trumbore ray-triangle intersection algorithm was used
-bool Triangle::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape> shape) const {
+bool Triangle::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape>& shape) const {
 	const float EPSILON = 0.0000001;
 	glm::vec3 a_b, a_c, h, s, q;
 	float a, f, u, v;

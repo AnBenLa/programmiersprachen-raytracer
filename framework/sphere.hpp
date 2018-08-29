@@ -10,7 +10,7 @@ public:
 	Sphere(glm::vec3 center, double radius,std::string name, std::shared_ptr<Material> material);
 	~Sphere();
 	std::ostream& print(std::ostream& os) const override;
-	bool intersect(Ray const&, float&,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>) const override;
+	bool intersect(Ray const&, float&,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>&) const override;
 	glm::vec3 center() const;
 	double radius() const;
 	std::shared_ptr<BoundingBox> boundingBox()const override;

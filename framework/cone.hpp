@@ -11,7 +11,7 @@ public:
 	Cone(glm::vec3 base, glm::vec3 peak , float radius, std::string name, std::shared_ptr<Material> material);
 	~Cone();
 	std::ostream& print(std::ostream& os) const override;
-	bool intersect(Ray const&, float&,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>) const override;
+	bool intersect(Ray const&, float&,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>&) const override;
 	float radius() const;
 	glm::vec3 peak() const;
 	glm::vec3 base() const;

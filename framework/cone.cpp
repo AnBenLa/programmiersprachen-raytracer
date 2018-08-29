@@ -22,7 +22,7 @@ std::ostream& Cone::print(std::ostream& os) const {
 	return Shape::print(os) << "Base: (" << base_.x << ", " << base_.y << ", " << base_.z << "), Peak: (" << peak_.x << ", " << peak_.y << ", " << peak_.z << "), Radius: "<< radius_ <<"\n";
 };
 
-bool Cone::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape> shape) const {
+bool Cone::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape>& shape) const {
 	glm::vec3 v = ray.direction;
 	glm::vec3 h = base_ - peak_;
 	glm::vec3 h_norm = glm::normalize(h);

@@ -114,6 +114,9 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 					std::string name = lineParts[1];
 					if (current_comp != nullptr) {
 						current_comp->updateBoundingBox();
+						if (obj_comp == nullptr) {
+							obj_comp = std::make_shared<Composite>();
+						}
 						obj_comp->add(current_comp);
 						std::cout << "Comp: " << current_name << " was added\n";
 					}
@@ -414,16 +417,17 @@ static void readSDF_File(std::string const& path,Scene& scene) {
 		std::string line;
 		std::map<std::string, std::shared_ptr<Shape>> shape_map;
 		std::map<std::string, std::shared_ptr<Composite>> composite_map;
-		std::shared_ptr<Composite> obj_comp = std::make_shared<Composite>();
+		std::shared_ptr<Composite> obj_comp = nullptr;
 		while(std::getline(ifs,line)){
 			deserializeObjects(scene, line, shape_map, composite_map, obj_comp);
 		}
-		if (scene.root_composite_ != nullptr) {
+		if (scene.root_composite_ != nullptr && obj_comp != nullptr) {
 			scene.root_composite_->add(obj_comp);
 		}
-		else {
+		else if (scene.root_composite_ == nullptr) {
 			scene.root_composite_ = obj_comp;
 		}
+		scene.root_composite_->updateBoundingBox();
 		std::cout << "\nScene loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;
 	}
 };

@@ -11,7 +11,7 @@ public:
 	Box(glm::vec3 min, glm::vec3 max, std::string name, std::shared_ptr<Material> material);
 	~Box();
 	std::ostream& print(std::ostream& os) const override;
-	bool intersect(Ray const&, float&,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>) const override;
+	bool intersect(Ray const&, float&,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>&) const override;
 	glm::vec3 min() const;
 	glm::vec3 max() const;
 	std::shared_ptr<BoundingBox> boundingBox()const override;
