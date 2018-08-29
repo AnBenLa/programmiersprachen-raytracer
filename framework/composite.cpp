@@ -162,15 +162,15 @@ void Composite::updateBoundingBox()
 
 		//get box max
 		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
-			->bool {return box1->max_.x < box2->max_.x; });
+			->bool {return box1->max_.x > box2->max_.x; });
 		max_bbox.x = (*boundingBoxes.begin())->max_.x;
 
 		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
-			->bool {return box1->max_.y < box2->max_.y; });
+			->bool {return box1->max_.y > box2->max_.y; });
 		max_bbox.y = (*boundingBoxes.begin())->max_.y;
 
 		std::sort(boundingBoxes.begin(), boundingBoxes.end(), [](std::shared_ptr<BoundingBox> box1, std::shared_ptr<BoundingBox> box2)
-			->bool {return box1->max_.z < box2->max_.z; });
+			->bool {return box1->max_.z > box2->max_.z; });
 		max_bbox.z = (*boundingBoxes.begin())->max_.z;
 	}
 	else {

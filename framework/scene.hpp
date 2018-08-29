@@ -86,7 +86,7 @@ static void readMTL_File(std::string const& path, Scene& scene){
 	}
 }
 
-static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<Composite> obj_comp){
+static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<Composite>& obj_comp){
 	std::ifstream ifs;
 	int shapes = 0;
 	ifs.open(path);
@@ -186,6 +186,7 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 			obj_comp->add(current_comp);
 			std::cout << "Comp: " << current_name << " was added\n";
 		}
+		obj_comp->updateBoundingBox();
 		std::cout << vertices.size() << " vertices loaded\n";
 		std::cout << shapes << " faces loaded\n";
 		std::cout << "\nOBJ loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;

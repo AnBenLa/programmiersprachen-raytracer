@@ -3,6 +3,7 @@
 #include <glm/gtx/intersect.hpp>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "shape.hpp"
 #include "color.hpp"
@@ -89,9 +90,28 @@ std::shared_ptr<BoundingBox>Triangle::boundingBox()const
 
 void Triangle::calculateBoundingBox()
 {
-	glm::vec3 AC{c_-a_};
-	glm::vec3 minBbox{a_};
-    glm::vec3 maxBbox{b_+AC};
+	std::vector<glm::vec3> points;
+	points.push_back(a_);
+	points.push_back(b_);
+	points.push_back(c_);
 
-    boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);
+	std::sort(points.begin(), points.end(), [](glm::vec3 p1, glm::vec3 p2)
+		->bool {return p1.x < p2.x; });
+	float min_x = points.at(0).x;
+	float max_x = points.at(2).x;
+
+	std::sort(points.begin(), points.end(), [](glm::vec3 p1, glm::vec3 p2)
+		->bool {return p1.y < p2.y; });
+	float min_y = points.at(0).y;
+	float max_y = points.at(2).y;
+
+	std::sort(points.begin(), points.end(), [](glm::vec3 p1, glm::vec3 p2)
+		->bool {return p1.z < p2.z; });
+	float min_z = points.at(0).z;
+	float max_z = points.at(2).z;
+
+	glm::vec3 min_bbox = glm::vec3{ min_x, min_y, min_z };
+	glm::vec3 max_bbox = glm::vec3{ max_x, max_y, max_z };
+
+    boundingBox_= std::make_shared<BoundingBox>(min_bbox,max_bbox);
 }
