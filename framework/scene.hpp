@@ -187,7 +187,7 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 			std::cout << "Comp: " << current_name << " was added\n";
 		}
 		obj_comp->updateBoundingBox();
-		std::cout << vertices.size() << " vertices loaded\n";
+		std::cout << "\n" << vertices.size() << " vertices loaded\n";
 		std::cout << shapes << " faces loaded\n";
 		std::cout << "\nOBJ loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;
 	}

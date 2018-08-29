@@ -13,7 +13,10 @@
 #include <math.h>
 #include <string>
 #include <chrono>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #include <ppl.h>
+#endif
+
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
   : width_(w)
@@ -28,37 +31,40 @@ void Renderer::render(Scene const& scene, int frames)
 	double d = (width_ / 2) / tan(scene.camera_->fov_ / 2 * M_PI / 180);
 	double frame_times = 0;
 	for (int i = 0; i < frames;++i) {
-		//scene.camera_->position_ = glm::vec3{ 0, 0 , 300 - i };
+		//scene.camera_->position_ = glm::vec3{ 0, 0 , 200 - i };
 		//scene.light_vec_.at(0)->position_ = glm::vec3{ 500,800,i*6 };
 		auto start = std::chrono::high_resolution_clock::now();
 		int progress = 0;
 		
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 		Concurrency::parallel_for(std::size_t(0), std::size_t(height_), [&](std::size_t y) {
-		//for(int y = 0; y < height_; ++y){
+#else
+		for (int y = 0; y < height_; ++y) {
+#endif	
 			if (progress == height_ / 4) {
 				std::cout << "25% - ";
-			} else if (progress == height_ / 2) {
+			}
+			else if (progress == height_ / 2) {
 				std::cout << "50% - ";
-			} else if (progress == (3 * height_) / 4) {
+			}
+			else if (progress == (3 * height_) / 4) {
 				std::wcout << "75%\n";
 			}
 			for (unsigned x = 0; x < width_; ++x) {
-				
 				Pixel p(x, y);
 				p.color = Color{ 0.2314, 0.5137, 0.7412 };
-				
+
 				//generate the camera ray
 				glm::vec3 pos = scene.camera_->position_;
 				glm::vec3 dir = glm::normalize(scene.camera_->direction_);
 				dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
 				Ray ray{ pos , glm::normalize(dir) };
-				
+
 				//calculate the first shape that gets hit
 				glm::vec3 cut, normal;
 				float distance;
 				std::shared_ptr<Shape> cut_shape = nullptr;
-				bool hit = scene.root_composite_->intersect(ray, distance ,cut, normal, cut_shape);
-				//Hit hit = get_closest_hit(scene, ray);
+				bool hit = scene.root_composite_->intersect(ray, distance, cut, normal, cut_shape);
 
 				//if a shape is hit the pixel color is computed
 				if (cut_shape != nullptr && hit) {
@@ -74,8 +80,11 @@ void Renderer::render(Scene const& scene, int frames)
 				write(p);
 			}
 			progress += 1;
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 		});
-		//}
+#else
+		}
+#endif	
 		auto finish = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = finish - start;
 		double elapsed_s = elapsed.count();
@@ -86,31 +95,6 @@ void Renderer::render(Scene const& scene, int frames)
 	}
 		std::cout << "Rendertime total: " << frame_times << ", Rendertime per Frame: " << frame_times / frames;
 }
-/*
-Hit Renderer::get_closest_hit(Scene const& scene, Ray const& ray) {
-	float min_distance = 0.0f;
-	std::shared_ptr<Shape> closest_shape = nullptr;
-	glm::vec3 closest_cut{};
-	glm::vec3 closest_normal{};
-
-	for (std::shared_ptr<Shape> shape_ptr : scene.shape_vec_) {
-		float distance = 0.0f;
-		glm::vec3 cut_point{};
-		glm::vec3 normal{};
-
-		if ((*shape_ptr).intersect(ray, distance, cut_point, normal)) {
-			if (distance < min_distance || (min_distance == 0.0f && closest_shape == nullptr)) {
-				min_distance = distance;
-				closest_shape = shape_ptr;
-				closest_cut = cut_point;
-				closest_normal = normal;
-			}
-		}
-	}
-	return Hit{ray.direction, closest_cut, closest_normal, closest_shape};
-}
-*/
-
 
 Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step) {
 	Color final_value{ 0.0f,0.0f,0.0f };
@@ -127,16 +111,16 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	return  final_value;
 }
 
-//not implemented yet
+//needs to be fixed
 Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step){
 	glm::vec3 reflection_vec = glm::reflect(glm::normalize(ray.direction), glm::normalize(normal));
 	Ray new_ray{ cut + 0.1f*normal, glm::normalize(reflection_vec) };
 	glm::vec3 new_cut, new_normal;
 	float distance;
 	std::shared_ptr<Shape> cut_shape = nullptr;
-	bool hit = scene.root_composite_->intersect(ray, distance ,new_cut, new_normal, cut_shape);
+	bool hit = scene.root_composite_->intersect(new_ray, distance ,new_cut, new_normal, cut_shape);
 
-	if (!hit && cut_shape != nullptr) {
+	if (!hit) {
 		return Color{ 0.2314, 0.5137, 0.7412 };
 	} else {
 		if (step > 0) {
@@ -176,8 +160,8 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 	
 		if (can_see_light) {
 			float o = glm::dot(vec_to_light, glm::normalize(normal));
-			if (o < 0)
-				o = -o;
+			//if (o < 0)
+			//	o = -o;
 			Color i_p = light->color_*light->brightness_;
 			Color k_d = shape->material()->kd;
 			light_colors.push_back(k_d * o *i_p);
