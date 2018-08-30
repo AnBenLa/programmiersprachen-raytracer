@@ -367,10 +367,9 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 			try {
 				std::string name = lineParts[2];
 				double fov = stof(lineParts[3]);
-				glm::vec3 default_pos{ 0.0f, 0.0f, 0.0f };
-				//always needs to has the norm 1
-				glm::vec3 default_dir{ 0.0f, 0.0f, -1.0f };
-				std::shared_ptr<Camera> camera = std::make_shared<Camera>(name, default_pos, default_dir, fov);
+				glm::vec3 pos = glm::vec3{ stof(lineParts[4]), stof(lineParts[5]), stof(lineParts[6]) };
+				glm::vec3 dir = glm::normalize(glm::vec3{ stof(lineParts[7]), stof(lineParts[8]), stof(lineParts[9]) });
+				std::shared_ptr<Camera> camera = std::make_shared<Camera>(name, pos, dir, fov);
 				scene.camera_ = camera;
 				std::cout << "Camera: " << *camera << "\n";
 			}

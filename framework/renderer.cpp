@@ -70,7 +70,7 @@ void Renderer::render(Scene const& scene, int frames)
 				if (cut_shape != nullptr && hit) {
 					//Color current_color = calculate_depth_map(hit.position_, scene, 600);
 					Color current_color = calculate_color(cut_shape, cut, normal, scene, ray, 3);
-					tone_mapping(current_color);
+					//tone_mapping(current_color);
 					p.color = current_color;
 				}
 				write(p);
@@ -104,12 +104,12 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	Color ambient = calculate_ambiente(shape, scene);
 	Color diffuse = calculate_diffuse(shape, cut, normal, scene);
 	Color specular = calculate_specular(shape, cut, normal, scene);
-	Color phong = ambient + diffuse;
+
 	if (shape->material()->glossy > 0) {
 		Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
-		final_value = phong * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
+		final_value = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
 	}else {
-		final_value = phong + specular;
+		final_value = ambient + diffuse + specular;
 	}
 	return  final_value;
 }
@@ -155,7 +155,6 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 		std::shared_ptr<Shape> cut_shape = nullptr;
 
 		//the cut can be inside the shape so a point outside the shape is calculated by cut + 0.1f*normal
-
 		bool cuts_shape = scene.root_composite_->intersect(Ray{ cut + 0.1f*normal,vec_to_light }, distance ,cut_point, normal_new, cut_shape);
 		if (cuts_shape && cut_shape != nullptr) {
 			can_see_light = false;
@@ -163,8 +162,6 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 	
 		if (can_see_light) {
 			float o = glm::dot(vec_to_light, glm::normalize(normal));
-			//if (o < 0)
-			//	o = -o;
 			Color i_p = light->color_*light->brightness_;
 			Color k_d = shape->material()->kd;
 			light_colors.push_back(k_d * o *i_p);
