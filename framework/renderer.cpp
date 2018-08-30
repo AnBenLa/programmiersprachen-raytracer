@@ -59,6 +59,8 @@ void Renderer::render(Scene const& scene, int frames)
 				glm::vec3 dir = glm::normalize(scene.camera_->direction_);
 				dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
 				Ray ray{ pos , glm::normalize(dir) };
+				scene.camera_->apply_transformation(ray);
+
 
 				//calculate the first shape that gets hit
 				glm::vec3 cut, normal;

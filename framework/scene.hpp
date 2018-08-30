@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <iterator>
+#include <glm/gtx/transform.hpp>
 
 #include "material.hpp"
 #include "shape.hpp"
@@ -369,7 +370,8 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 				double fov = stof(lineParts[3]);
 				glm::vec3 pos = glm::vec3{ stof(lineParts[4]), stof(lineParts[5]), stof(lineParts[6]) };
 				glm::vec3 dir = glm::normalize(glm::vec3{ stof(lineParts[7]), stof(lineParts[8]), stof(lineParts[9]) });
-				std::shared_ptr<Camera> camera = std::make_shared<Camera>(name, pos, dir, fov);
+				glm::vec3 up  = glm::normalize(glm::vec3{ stof(lineParts[10]), stof(lineParts[11]), stof(lineParts[12]) });
+				std::shared_ptr<Camera> camera = std::make_shared<Camera>(name, pos, dir, up , fov);
 				scene.camera_ = camera;
 				std::cout << "Camera: " << *camera << "\n";
 			}
@@ -400,7 +402,50 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 			std::cout << "Something went wrong, while loading the ambiente. Check format!\n";
 			std::cout << "Throws exception : " << arg.what() << "\n";
 		}
-
+	}
+	if (lineParts[0] == "transform") {
+		std::cout << "Transform ...\n";
+		try {
+			std::string object = lineParts[1];
+			std::shared_ptr<Shape> shape = nullptr;
+			std::shared_ptr<Camera> camera = nullptr;
+			if (shape_map.find(object) != shape_map.end()) {
+				shape = shape_map.at(object);
+			} else if (scene.camera_ != nullptr && scene.camera_->name_ == object) {
+				camera = scene.camera_;
+			}
+			if (shape != nullptr) {
+				throw std::invalid_argument("shape transform not implemented yet!\n");
+			} else if (camera != nullptr) {
+				if (lineParts[2] == "rotate") {
+					glm::mat4x4 rotation = glm::rotate(stof(lineParts[3]), glm::vec3{ stof(lineParts[4]), stof(lineParts[5]), stof(lineParts[6]) });
+					glm::vec4 n_4 = glm::vec4{ camera->direction_, 0 } * rotation;
+					glm::vec4 up_4 = glm::vec4{ camera->up_, 0 } *rotation;
+					glm::vec3 n = glm::normalize(glm::vec3{ n_4.x, n_4.y , n_4.z });
+					glm::vec3 up = glm::vec3{ up_4.x, up_4.y , up_4.z };
+					glm::vec3 u = glm::normalize(glm::cross(n, up));
+					glm::vec3 v = glm::normalize(glm::cross(u, n));
+					camera->transformation_ += glm::mat4{ 
+						glm::vec4{u,0.0f}, 
+						glm::vec4{v,0.0f}, 
+						glm::vec4{-n,0.0f}, 
+						glm::vec4{0.0f} 
+					};
+					std::cout << "test";
+				} else if (lineParts[2] == "translate") {
+					camera->transformation_ += glm::mat4{ 
+						glm::vec4{0.0f}, 
+						glm::vec4{0.0f}, 
+						glm::vec4{0.0f}, 
+						glm::vec4{stof(lineParts[3]), stof(lineParts[4]), stof(lineParts[5]), 1.0f} };
+					std::cout << "test";
+				}
+			}
+		}
+		catch (std::invalid_argument arg) {
+			std::cout << "Something went wrong, while transforming an object or camera. Check format!\n";
+			std::cout << "Throws exception : " << arg.what() << "\n";
+		}
 	}
 }
 
