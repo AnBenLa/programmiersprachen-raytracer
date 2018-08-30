@@ -70,11 +70,7 @@ void Renderer::render(Scene const& scene, int frames)
 				if (cut_shape != nullptr && hit) {
 					//Color current_color = calculate_depth_map(hit.position_, scene, 600);
 					Color current_color = calculate_color(cut_shape, cut, normal, scene, ray, 3);
-					//tone mapping ???
-					//float tone_r = current_color.r / (current_color.r + 1);
-					//float tone_g = current_color.g / (current_color.g + 1);
-					//float tone_b = current_color.b / (current_color.b + 1);
-					//current_color = Color{ tone_r,tone_g,tone_b };
+					tone_mapping(current_color);
 					p.color = current_color;
 				}
 				write(p);
@@ -94,6 +90,13 @@ void Renderer::render(Scene const& scene, int frames)
 		ppm_.save(filename_ + "_" + std::to_string(i) + ".ppm");
 	}
 		std::cout << "Rendertime total: " << frame_times << ", Rendertime per Frame: " << frame_times / frames;
+}
+
+void Renderer::tone_mapping(Color& current_color) {
+	float tone_r = current_color.r / (current_color.r + 1);
+	float tone_g = current_color.g / (current_color.g + 1);
+	float tone_b = current_color.b / (current_color.b + 1);
+	current_color = Color{ tone_r,tone_g,tone_b };
 }
 
 Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step) {

@@ -30,6 +30,7 @@ public:
   Color calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene);
   Color calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene);
   Color calculate_depth_map(glm::vec3 const& cut, Scene const& scene, float const& max_dist);
+  void tone_mapping(Color& color);
 
   inline std::vector<Color> const& color_buffer() const
   {
