@@ -239,3 +239,17 @@ void Renderer::write(Pixel const& p)
 
   ppm_.write(p);
 }
+
+Ray transformRay(glm::mat4 const& mat, Ray const& ray)
+{
+	//create homogen coords
+	glm::vec4 origin{ray.origin,1};
+	glm::vec4 direction{ray.direction,0};
+
+	//transform ray
+	origin = mat*origin;
+	direction = mat*direction;
+	
+	//apply to Ray
+	return Ray{glm::vec3{origin.x,origin.y,origin.z},glm::vec3{direction.x,direction.y,direction.z}};
+}

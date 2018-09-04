@@ -298,7 +298,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					std::cout << "Throws exception : " << arg.what() << "\n";
 				}
 			}
-			if(lineParts[2] == "cylinder")
+			/*if(lineParts[2] == "cylinder")
 			{
 				try{
 					std::string name = lineParts[3];
@@ -315,7 +315,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					std::cout<<"Something went wrong, while loading the cylinder. Check format!\n";
 					std::cout<<"Throws exception: "<<arg.what()<<"\n";
 				}
-			}
+			}*/
 			if (lineParts[2] == "composite")
 			{
 				try {
@@ -415,7 +415,38 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 				camera = scene.camera_;
 			}
 			if (shape != nullptr) {
-				throw std::invalid_argument("shape transform not implemented yet!\n");
+				
+				if(lineParts[2] == "translate")
+				{
+					glm::vec3 translation{stof(lineParts[3]),stof(lineParts[4]),stof(lineParts[5])};
+					shape->apply_transformation(translation,0,x_axis,glm::vec3{1.0f,1.0f,1.0f});
+				}
+				else if(lineParts[2] == "rotate")
+				{
+					float radius{stof(lineParts[3])};
+					Axis axis;
+					if(lineParts[4]=="x")
+					{
+						axis = x_axis;
+					}
+					else if(lineParts[4]=="y")
+					{
+						axis = y_axis;
+					}
+					else
+					{
+						axis = z_axis;
+					}
+					shape->apply_transformation(glm::vec3{0.0f,0.0f,0.0f},radius,axis,glm::vec3{1.0f,1.0f,1.0f});
+
+				}
+				else if(lineParts[2] == "scale")
+				{
+					glm::vec3 scale{stof(lineParts[3]),stof(lineParts[4]),stof(lineParts[5])};
+					shape->apply_transformation(glm::vec3{0.0f,0.0f,0.0f},0,x_axis,scale);
+				}
+
+
 			} else if (camera != nullptr) {
 				if (lineParts[2] == "rotate") {
 					glm::mat4x4 rotation = glm::rotate(stof(lineParts[3]), glm::vec3{ stof(lineParts[4]), stof(lineParts[5]), stof(lineParts[6]) });

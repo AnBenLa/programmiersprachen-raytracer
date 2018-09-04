@@ -10,10 +10,9 @@
 #include "ray.hpp"
 #include "cylinder.hpp"
 
-Cylinder::Cylinder(glm::vec3 const& base, glm::vec3 const& top, double radius, std::string const& name, std::shared_ptr<Material> const& material):
+Cylinder::Cylinder(float height,float radius, std::string const& name, std::shared_ptr<Material> const& material):
     Shape{name, material},
-    base_{base},
-    top_{top},
+    height_{height},
     radius_{radius}
     {
         calculateBoundingBox();
@@ -22,12 +21,13 @@ Cylinder::Cylinder(glm::vec3 const& base, glm::vec3 const& top, double radius, s
 Cylinder::~Cylinder(){};
 
 std::ostream& Cylinder::print(std::ostream& os) const {
-	return Shape::print(os)<<"Base: ("<<base_.x<<","<<base_.y<<","<<base_.z<<"), "<<"Top: ("<<top_.x<<","<<top_.y<<","<<top_.z<<"), "<<"Radius: "<<radius_<<"\n";
+	return Shape::print(os)<<"Height: "<<height_<<", "<<"Radius: "<<radius_<<"\n";
 }
 
 //not ready yet
 bool Cylinder::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape>& shape)const
 {
+    /*
     //check intersection with infinite cylinder
     glm::vec3 AB = base_ - top_;
     glm::vec3 AO = ray.origin - base_;
@@ -71,15 +71,15 @@ bool Cylinder::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, 
 			return true;
         }   
         else return false;    
-    }
+    }*/
 }
 
 void Cylinder::calculateBoundingBox()
 {
-    glm::vec3 minBbox{base_.x-radius_,base_.y-radius_,base_.z-radius_};
+    /*glm::vec3 minBbox{base_.x-radius_,base_.y-radius_,base_.z-radius_};
     glm::vec3 maxBbox{top_.x+radius_,top_.y+radius_,top_.z+radius_};
 
-    boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);
+    boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);*/
 }
 
 std::shared_ptr<BoundingBox> Cylinder::boundingBox() const {

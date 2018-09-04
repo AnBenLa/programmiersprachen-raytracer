@@ -4,6 +4,7 @@
 *.o
 *.obj
 
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
@@ -19,6 +20,9 @@
 *.exe
 *.out
 *.app
+
+#IDE specific
+.json
 
 checkerboard.ppm
 

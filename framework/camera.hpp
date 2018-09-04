@@ -11,10 +11,10 @@ struct Camera{
 
 	Camera(std::string name, glm::vec3 pos, glm::vec3 dir, glm::vec3 up, unsigned int fov) : name_(name), position_(pos), direction_(dir), fov_(fov), up_(up) {
 		transformation_ = glm::mat4x4{ 
-			glm::vec4{0.0f,0.0f,0.0f,0.0f},
-			glm::vec4{0.0f,0.0f,0.0f,0.0f},
-			glm::vec4{0.0f,0.0f,0.0f,0.0f},
-			glm::vec4{0.0f,0.0f,0.0f,0.0f} };
+			glm::vec4{1.0f,0.0f,0.0f,0.0f},
+			glm::vec4{0.0f,1.0f,0.0f,0.0f},
+			glm::vec4{0.0f,0.0f,1.0f,0.0f},
+			glm::vec4{0.0f,0.0f,0.0f,1.0f}};
 	}
 
 	void apply_transformation(Ray& normal_ray) const {

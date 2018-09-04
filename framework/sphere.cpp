@@ -8,6 +8,7 @@
 #include <glm/gtx/intersect.hpp>
 #include "ray.hpp"
 #include "box.hpp"
+#include "renderer.hpp"
 
 Sphere::Sphere(glm::vec3 center, double radius, std::string name, std::shared_ptr<Material> material) :
 	Shape{name, material}, center_ { center }, radius_{ radius } 
@@ -23,13 +24,15 @@ std::ostream& Sphere::print(std::ostream& os) const {
 };
 
 bool Sphere::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape>& shape) const {
-	bool hit_found = glm::intersectRaySphere(ray.origin, glm::normalize(ray.direction), center_, radius_, cut_point , normal);
+	//std::cout<<"\n\n\n"<<ray.origin.x<<","<<ray.origin.y<<","<<ray.origin.z<<"\n";
+	Ray transformedRay = transformRay(world_transformation_inv_,ray);
+	//std::cout<<transformedRay.origin.x<<","<<transformedRay.origin.y<<","<<transformedRay.origin.z<<"\n";
+	bool hit_found = glm::intersectRaySphere(transformedRay.origin, glm::normalize(transformedRay.direction), center_, radius_, cut_point , normal);
 	if (hit_found) {
-		distance = glm::length(cut_point - ray.origin);
+		distance = glm::length(cut_point - transformedRay.origin);
 		shape = std::make_shared<Sphere>(center_, radius_, name(), material());
 		return true;
 	}
-
 	return false;
 }
 
