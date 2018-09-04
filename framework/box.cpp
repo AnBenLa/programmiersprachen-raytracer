@@ -37,12 +37,12 @@ bool Box::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::
 	Plane plane6{ max_, glm::vec3 { 0,1,0 } };
 
 	//calculationg the distance to the plane
-	float distance1 = (glm::dot(plane1.normal, plane1.origin) - glm::dot(transformedRay.origin, plane1.normal)) / (glm::dot(ray.direction, plane1.normal));
-	float distance2 = (glm::dot(plane2.normal, plane2.origin) - glm::dot(transformedRay.origin, plane2.normal)) / (glm::dot(ray.direction, plane2.normal));
-	float distance3 = (glm::dot(plane3.normal, plane3.origin) - glm::dot(transformedRay.origin, plane3.normal)) / (glm::dot(ray.direction, plane3.normal));
-	float distance4 = (glm::dot(plane4.normal, plane4.origin) - glm::dot(transformedRay.origin, plane4.normal)) / (glm::dot(ray.direction, plane4.normal));
-	float distance5 = (glm::dot(plane5.normal, plane5.origin) - glm::dot(transformedRay.origin, plane5.normal)) / (glm::dot(ray.direction, plane5.normal));
-	float distance6 = (glm::dot(plane6.normal, plane6.origin) - glm::dot(transformedRay.origin, plane6.normal)) / (glm::dot(ray.direction, plane6.normal));;
+	float distance1 = (glm::dot(plane1.normal, plane1.origin) - glm::dot(transformedRay.origin, plane1.normal)) / (glm::dot(transformedRay.direction, plane1.normal));
+	float distance2 = (glm::dot(plane2.normal, plane2.origin) - glm::dot(transformedRay.origin, plane2.normal)) / (glm::dot(transformedRay.direction, plane2.normal));
+	float distance3 = (glm::dot(plane3.normal, plane3.origin) - glm::dot(transformedRay.origin, plane3.normal)) / (glm::dot(transformedRay.direction, plane3.normal));
+	float distance4 = (glm::dot(plane4.normal, plane4.origin) - glm::dot(transformedRay.origin, plane4.normal)) / (glm::dot(transformedRay.direction, plane4.normal));
+	float distance5 = (glm::dot(plane5.normal, plane5.origin) - glm::dot(transformedRay.origin, plane5.normal)) / (glm::dot(transformedRay.direction, plane5.normal));
+	float distance6 = (glm::dot(plane6.normal, plane6.origin) - glm::dot(transformedRay.origin, plane6.normal)) / (glm::dot(transformedRay.direction, plane6.normal));
 
 	std::vector<glm::vec3> cut_points;
 	std::vector<glm::vec3> cut_normals;
@@ -104,9 +104,11 @@ bool Box::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::
 				closest_normal = cut_normals.at(it);
 			}
 		}
-		distance = glm::length(closest_cut - transformedRay.origin);
-		cut_point = closest_cut;
-		normal = closest_normal;
+		glm::vec4 transformed_cut = world_transformation_ * glm::vec4{ closest_cut, 1 };
+		glm::vec4 transformed_normal = glm::transpose(world_transformation_) * glm::vec4{ closest_normal , 0 };
+		cut_point = glm::vec3{ transformed_cut.x, transformed_cut.y, transformed_cut.z };
+		normal = glm::vec3{transformed_normal.x, transformed_normal.y, transformed_normal.z};
+		distance = glm::length(cut_point - ray.origin);
 		shape = std::make_shared<Box>(min_, max_, name(), material());
 		return true;
 	}

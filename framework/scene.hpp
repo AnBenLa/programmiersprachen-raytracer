@@ -1,5 +1,6 @@
 #ifndef SCENE_STRUCT
 #define SCENE_STRUCT
+#define _USE_MATH_DEFINES
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -8,6 +9,7 @@
 #include <sstream>
 #include <iterator>
 #include <glm/gtx/transform.hpp>
+#include <math.h>
 
 #include "material.hpp"
 #include "shape.hpp"
@@ -423,7 +425,8 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 				}
 				else if(lineParts[2] == "rotate")
 				{
-					float radius{stof(lineParts[3])};
+					float angle{stof(lineParts[3])};
+					angle = (angle * 2 * M_PI) / 360;
 					Axis axis;
 					if(lineParts[4]=="x")
 					{
@@ -437,7 +440,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					{
 						axis = z_axis;
 					}
-					shape->apply_transformation(glm::vec3{0.0f,0.0f,0.0f},radius,axis,glm::vec3{1.0f,1.0f,1.0f});
+					shape->apply_transformation(glm::vec3{0.0f,0.0f,0.0f},angle,axis,glm::vec3{1.0f,1.0f,1.0f});
 
 				}
 				else if(lineParts[2] == "scale")
@@ -462,14 +465,12 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 						glm::vec4{-n,0.0f}, 
 						glm::vec4{0.0f} 
 					};
-					std::cout << "test";
 				} else if (lineParts[2] == "translate") {
 					camera->transformation_ += glm::mat4{ 
 						glm::vec4{0.0f}, 
 						glm::vec4{0.0f}, 
 						glm::vec4{0.0f}, 
 						glm::vec4{stof(lineParts[3]), stof(lineParts[4]), stof(lineParts[5]), 1.0f} };
-					std::cout << "test";
 				}
 			}
 		}

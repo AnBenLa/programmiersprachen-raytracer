@@ -52,15 +52,14 @@ void Renderer::render(Scene const& scene, int frames)
 			}
 			for (unsigned x = 0; x < width_; ++x) {
 				Pixel p(x, y);
-				p.color = Color{ 0.2314, 0.5137, 0.7412 };
+				p.color = Color{ 0.2314f, 0.5137f, 0.7412f };
 
 				//generate the camera ray
 				glm::vec3 pos = scene.camera_->position_;
 				glm::vec3 dir = glm::normalize(scene.camera_->direction_);
 				dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
 				Ray ray{ pos , glm::normalize(dir) };
-				scene.camera_->apply_transformation(ray);
-
+				ray = transformRay(scene.camera_->transformation_, ray);
 
 				//calculate the first shape that gets hit
 				glm::vec3 cut, normal;
@@ -70,7 +69,7 @@ void Renderer::render(Scene const& scene, int frames)
 
 				//if a shape is hit the pixel color is computed
 				if (cut_shape != nullptr && hit) {
-					//Color current_color = calculate_depth_map(hit.position_, scene, 600);
+					//Color current_color = calculate_depth_map(cut, scene, 300);
 					Color current_color = calculate_color(cut_shape, cut, normal, scene, ray, 3);
 					//tone_mapping(current_color);
 					p.color = current_color;
@@ -126,7 +125,7 @@ Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 con
 	bool hit = scene.root_composite_->intersect(new_ray, distance ,new_cut, new_normal, cut_shape);
 
 	if (!hit) {
-		return Color{ 0.2314, 0.5137, 0.7412 };
+		return Color{ 0.2314f, 0.5137f, 0.7412f };
 	} else {
 		if (step > 0) {
 			Color reflected_color = calculate_color(cut_shape, new_cut, new_normal, scene, new_ray, step - 1);

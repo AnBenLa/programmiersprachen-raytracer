@@ -17,13 +17,6 @@ struct Camera{
 			glm::vec4{0.0f,0.0f,0.0f,1.0f}};
 	}
 
-	void apply_transformation(Ray& normal_ray) const {
-		glm::vec4 new_origin = transformation_ * glm::vec4{ normal_ray.origin, 1 };
-		glm::vec4 new_direction = transformation_ * glm::vec4{ normal_ray.direction, 0 };
-		normal_ray =  Ray{ glm::vec3{new_origin.x, new_origin.y , new_origin.z}, 
-					glm::vec3{new_direction.x, new_direction.y, new_direction.z} };
-	}
-
 	friend std::ostream& operator<<(std::ostream& os, Camera const& c)
 	{
 		os << "Name: " << c.name_ 

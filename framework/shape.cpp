@@ -4,7 +4,7 @@
 #include "shape.hpp"
 #include "color.hpp"
 
-#define TRANSLATE_MATRIX glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,translate.x},glm::vec4{0.0f,1.0f,0.0f,translate.y},glm::vec4{0.0f,0.0f,1.0f,translate.z},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
+#define TRANSLATE_MATRIX glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{translate.x,translate.y,translate.z,1.0f}}
 #define SCALE_MATRIX glm::mat4x4{glm::vec4{scale.x,0.0f,0.0f,0.0f},glm::vec4{0.0f,scale.y,0.0f,0.0f},glm::vec4{0.0f,0.0f,scale.z,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
 #define XROT_MATRIX  glm::mat4x4{glm::vec4{1,0.0f,0.0f,0.0f},glm::vec4{0.0f,glm::cos(rotation),glm::sin(rotation),0.0f},glm::vec4{0.0f,-glm::sin(rotation),glm::cos(rotation),0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
 #define YROT_MATRIX	 glm::mat4x4{glm::vec4{glm::cos(rotation),0.0f,-glm::sin(rotation),0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{glm::sin(rotation),0.0f,glm::cos(rotation),0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
@@ -25,18 +25,21 @@ std::ostream& Shape::print(std::ostream& os) const
 
 void Shape::apply_transformation(glm::vec3 const& translate,float rotation, Axis axis,glm::vec3 const& scale)
 {
+	glm::mat4x4 transla = TRANSLATE_MATRIX * XROT_MATRIX;
     //create TRS matrix
     //determines rotationaxis
     switch(axis)
     {
         case x_axis:
-        world_transformation_= TRANSLATE_MATRIX*XROT_MATRIX*SCALE_MATRIX;
+		world_transformation_= world_transformation_ * TRANSLATE_MATRIX*XROT_MATRIX*SCALE_MATRIX;
+		break;
 
         case y_axis:
-        world_transformation_=TRANSLATE_MATRIX*YROT_MATRIX*SCALE_MATRIX;
+        world_transformation_= world_transformation_ * TRANSLATE_MATRIX*YROT_MATRIX*SCALE_MATRIX;
+		break;
 
         case z_axis:
-        world_transformation_=TRANSLATE_MATRIX*ZROT_MATRIX*SCALE_MATRIX;
+        world_transformation_= world_transformation_ * TRANSLATE_MATRIX*ZROT_MATRIX*SCALE_MATRIX;
     }
     world_transformation_inv_ = glm::inverse(world_transformation_);
 }

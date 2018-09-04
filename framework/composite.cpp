@@ -34,7 +34,7 @@ bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cu
 	bool first_dist_set = false;
     
     //first check BoundingBox intersection, then children intersection
-    if(boundingBox_->intersect(incoming_ray))
+    if(true/*boundingBox_->intersect(incoming_ray)*/)
     {
         //check composites for intersection
         for(std::shared_ptr<Composite> child : composites_)
