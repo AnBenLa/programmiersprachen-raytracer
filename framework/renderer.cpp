@@ -69,7 +69,7 @@ void Renderer::render(Scene const& scene, int frames)
 
 				//if a shape is hit the pixel color is computed
 				if (cut_shape != nullptr && hit) {
-					//Color current_color = calculate_depth_map(cut, scene, 300);
+					//Color current_color = calculate_depth_map(cut, scene, 150);
 					Color current_color = calculate_color(cut_shape, cut, normal, scene, ray, 3);
 					//tone_mapping(current_color);
 					p.color = current_color;

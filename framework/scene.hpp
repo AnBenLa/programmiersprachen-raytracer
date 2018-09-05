@@ -287,10 +287,10 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 				try {
 					std::string name = lineParts[3];
 					glm::vec3 base = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
-					glm::vec3 peak = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
-					float radius = std::stof(lineParts[10], NULL);
-					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
-					std::shared_ptr<Cone> cone = std::make_shared<Cone>(base, peak, radius, name, mat);
+					float height = std::stof(lineParts[7], NULL);
+					float radius = std::stof(lineParts[8], NULL);
+					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[9]);
+					std::shared_ptr<Cone> cone = std::make_shared<Cone>(base, height, radius, name, mat);
 					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, cone));
 					std::cout << "Cone: " << *cone << "\n";
 				}
