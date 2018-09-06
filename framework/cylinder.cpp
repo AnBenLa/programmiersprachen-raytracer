@@ -13,6 +13,7 @@
 
 Cylinder::Cylinder(glm::vec3 base, float height,float radius, std::string const& name, std::shared_ptr<Material> const& material):
     Shape{name, material},
+	base_{base},
     height_{height},
     radius_{radius}
     {
