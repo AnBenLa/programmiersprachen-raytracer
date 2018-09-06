@@ -14,8 +14,8 @@
 Cone::Cone(glm::vec3 base, float height, float radius ,std::string name, std::shared_ptr<Material> material) :
 	Shape{ name, material }, base_{ base }, height_{ height }, radius_{radius} 
 	{
-		//transforms the cone so that it stands on the y axis with the base at the origin
-		apply_transformation(glm::vec3{ 0,  height, 0 }, -M_PI/2, x_axis, glm::vec3{ radius,radius,height });
+		//transforms the cone so that its alligned with the y axis
+		apply_transformation(glm::vec3{ 0 + base.x,  height + base.y, 0 + base.z }, -M_PI / 2, x_axis, glm::vec3{ radius,radius,height });
 		calculateBoundingBox();
 	};
 
@@ -89,12 +89,14 @@ bool Cone::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm:
 		Plane plane{ glm::vec3{ 0,0,-1 }, glm::vec3{ 0,0,1 } };
 		float distance_base = (glm::dot(plane.normal, plane.origin) - glm::dot(transformedRay.origin, plane.normal)) / (glm::dot(transformedRay.direction, plane.normal));
 		glm::vec3  base_cut = transformedRay.origin + distance_base * transformedRay.direction;
-		if (glm::length(base_cut - glm::vec3{ 0,0,-1 }) <= 1) {
-			if ((c1 && c2 && distance_base < t_1 && distance_base < t_2) || (c1 && distance_base < t_1) || (c2 && distance_base < t_2)) {
-				cut_point = base_cut;
-				distance = distance_base;
-				normal = glm::normalize(glm::vec3{ 0, 0 , -1.0f });
-				cut = true;
+		if (distance_base > 0) {
+			if (glm::length(base_cut - glm::vec3{ 0,0,-1 }) <= 1) {
+				if ((c1 && c2 && distance_base < t_1 && distance_base < t_2) || (c1 && distance_base < t_1) || (c2 && distance_base < t_2)) {
+					cut_point = base_cut;
+					distance = distance_base;
+					normal = glm::normalize(glm::vec3{ 0, 0 , -1.0f });
+					cut = true;
+				}
 			}
 		}
 		if (cut) {

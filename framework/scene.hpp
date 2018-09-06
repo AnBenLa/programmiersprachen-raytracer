@@ -300,15 +300,15 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					std::cout << "Throws exception : " << arg.what() << "\n";
 				}
 			}
-			/*if(lineParts[2] == "cylinder")
+			if(lineParts[2] == "cylinder")
 			{
 				try{
 					std::string name = lineParts[3];
 					glm::vec3 base = glm::vec3{std::stof(lineParts[4],NULL),std::stof(lineParts[5],NULL),std::stof(lineParts[6],NULL)};
-					glm::vec3 top = glm::vec3{std::stof(lineParts[7],NULL),std::stof(lineParts[8],NULL),std::stof(lineParts[9],NULL)};
-					float radius = std::stof(lineParts[10],NULL);
-					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
-					std::shared_ptr<Cylinder>cylinder = std::make_shared<Cylinder>(base,top,radius,name,mat);
+					float height = std::stof(lineParts[7], NULL);
+					float radius = std::stof(lineParts[8],NULL);
+					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[9]);
+					std::shared_ptr<Cylinder>cylinder = std::make_shared<Cylinder>(base,height,radius,name,mat);
 					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, cylinder));
 					std::cout<<"Cylinder: "<<*cylinder<<"\n";
 				}
@@ -317,7 +317,7 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					std::cout<<"Something went wrong, while loading the cylinder. Check format!\n";
 					std::cout<<"Throws exception: "<<arg.what()<<"\n";
 				}
-			}*/
+			}
 			if (lineParts[2] == "composite")
 			{
 				try {
