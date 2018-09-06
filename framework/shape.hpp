@@ -14,7 +14,7 @@
 
 enum Axis{x_axis,y_axis,z_axis};
 
-class Shape : std::enable_shared_from_this<Shape> {
+class Shape {
 public:
 	Shape(std::string const& name, std::shared_ptr<Material> const& material);
 	~Shape();
