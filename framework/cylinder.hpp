@@ -1,3 +1,4 @@
+
 #ifndef CYLINDER_HEADER
 #define CYLINDER_HEADER
 #include <glm/vec3.hpp>
@@ -9,18 +10,19 @@
 class Cylinder : public Shape
 {
     public:
-        Cylinder(float height,float radius,std::string const& name,std::shared_ptr<Material> const& material);
+        Cylinder(glm::vec3 base ,float height,float radius,std::string const& name,std::shared_ptr<Material> const& material);
         ~Cylinder();
         std::ostream& print(std::ostream& os)const override;
         bool intersect(Ray const& ray, float& ,glm::vec3&,glm::vec3&, std::shared_ptr<Shape>&)const override;
 
         //getter
-        glm::vec3 top() const;
         glm::vec3 base()const;
-        double radius() const;
+		float height() const;
+        float radius() const;
         std::shared_ptr<BoundingBox> boundingBox() const override;
 
     private:
+		glm::vec3 base_;
         float height_;
         float radius_;
         void calculateBoundingBox();

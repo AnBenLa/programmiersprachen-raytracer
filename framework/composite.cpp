@@ -1,16 +1,29 @@
 #include "composite.hpp"
 #include <algorithm>
+#include "renderer.hpp"
 
-Composite::Composite() : Shape{"no name", nullptr} {};
+#define TRANSLATE_MATRIX glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{translate.x,translate.y,translate.z,1.0f}}
+#define SCALE_MATRIX glm::mat4x4{glm::vec4{scale.x,0.0f,0.0f,0.0f},glm::vec4{0.0f,scale.y,0.0f,0.0f},glm::vec4{0.0f,0.0f,scale.z,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
+#define XROT_MATRIX  glm::mat4x4{glm::vec4{1,0.0f,0.0f,0.0f},glm::vec4{0.0f,glm::cos(rotation),glm::sin(rotation),0.0f},glm::vec4{0.0f,-glm::sin(rotation),glm::cos(rotation),0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
+#define YROT_MATRIX	 glm::mat4x4{glm::vec4{glm::cos(rotation),0.0f,-glm::sin(rotation),0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{glm::sin(rotation),0.0f,glm::cos(rotation),0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
+#define ZROT_MATRIX  glm::mat4x4{glm::vec4{glm::cos(rotation),glm::sin(rotation),0.0f,0.0f},glm::vec4{-glm::sin(rotation),glm::cos(rotation),0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
 
-Composite::Composite(std::string const& name) : Shape{ name, nullptr } {};
+Composite::Composite() : Shape{"no name", nullptr} {
+    world_transformation_= glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}};
+    world_transformation_inv_ = glm::inverse(world_transformation_);};
+
+Composite::Composite(std::string const& name) : Shape{ name, nullptr } {
+    world_transformation_= glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}};
+    world_transformation_inv_ = glm::inverse(world_transformation_);};
 
 Composite::Composite(std::string const& name,std::vector<std::shared_ptr<Shape>>const& shapes,std::vector<std::shared_ptr<Composite>>const& composites):
     Shape{name, nullptr},
     shapes_{shapes},
     composites_{composites}
 {
-    updateBoundingBox();
+    createBoundingBox();
+    world_transformation_= glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}};
+    world_transformation_inv_ = glm::inverse(world_transformation_);
 };
 
 Composite::~Composite(){};
@@ -19,22 +32,25 @@ Composite::~Composite(){};
 void Composite::add(std::shared_ptr<Shape> const& child)
 {
     shapes_.push_back(child);
+    updateBoundingBox(child);
 }
 
 void Composite::add(std::shared_ptr<Composite> const& child)
 {
     composites_.push_back(child);
+    updateBoundingBox(child);
 }
 
 bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cut_point, glm::vec3& normal_vec, std::shared_ptr<Shape>& shape)const
 {
+    Ray transformedRay = transformRay(world_transformation_inv_,incoming_ray);
 	float closest_distance = 0.0f;
 	std::shared_ptr<Shape> closest_shape;
 	glm::vec3 closest_normal, closest_cut;
 	bool first_dist_set = false;
     
     //first check BoundingBox intersection, then children intersection
-    if(true/*boundingBox_->intersect(incoming_ray)*/)
+    if(boundingBox_->intersect(transformedRay))
     {
         //check composites for intersection
         for(std::shared_ptr<Composite> child : composites_)
@@ -43,7 +59,7 @@ bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cu
 			glm::vec3 current_cut, current_norm;
 			std::shared_ptr<Shape> current_shape;
 
-            if(child->intersect(incoming_ray, current_dist, current_cut, current_norm, current_shape))
+            if(child->intersect(transformedRay, current_dist, current_cut, current_norm, current_shape))
             {
                 if(current_dist < closest_distance || !first_dist_set)
                 {
@@ -62,7 +78,7 @@ bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cu
 			float current_dist = 0.0f;
 			glm::vec3 current_cut, current_norm;
 			std::shared_ptr<Shape> current_shape;
-            if(child->intersect(incoming_ray, current_dist, current_cut, current_norm, current_shape))
+            if(child->intersect(transformedRay, current_dist, current_cut, current_norm, current_shape))
             {
                 if(current_dist < closest_distance || !first_dist_set)
                 {
@@ -85,6 +101,26 @@ bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cu
 	else {
 		return false;
 	}
+}
+
+void Composite::apply_transformation(glm::vec3 const& translate,float rotation, Axis axis,glm::vec3 const& scale)
+{
+    //create TRS matrix
+    //determines rotationaxis
+    switch(axis)
+    {
+        case x_axis:
+		world_transformation_= world_transformation_ * TRANSLATE_MATRIX*XROT_MATRIX*SCALE_MATRIX;
+		break;
+
+        case y_axis:
+        world_transformation_= world_transformation_ * TRANSLATE_MATRIX*YROT_MATRIX*SCALE_MATRIX;
+		break;
+
+        case z_axis:
+        world_transformation_= world_transformation_ * TRANSLATE_MATRIX*ZROT_MATRIX*SCALE_MATRIX;
+    }
+    world_transformation_inv_ = glm::inverse(world_transformation_);
 }
 
 std::vector<std::shared_ptr<Shape>>& Composite::getShapes(std::vector<std::shared_ptr<Shape>>& shapes)
@@ -122,12 +158,12 @@ std::ostream& Composite::print(std::ostream& os)const
 }
 
 std::shared_ptr<BoundingBox> Composite::boundingBox()const
-{
+{   
     return boundingBox_;
 }
 
-//extends the BoundingBox if neccessary
-void Composite::updateBoundingBox()
+//creates a bounding box for the whole composite
+void Composite::createBoundingBox()
 {
     //vector, which contains all bounding boxes from shapes
     std::vector<std::shared_ptr<BoundingBox>> boundingBoxes;
@@ -178,4 +214,55 @@ void Composite::updateBoundingBox()
 		max_bbox = boundingBoxes.at(0)->max_;
 	}
     boundingBox_ = std::make_shared<BoundingBox>(min_bbox,max_bbox);
+}
+
+//extends the BoundingBox if neccessary
+void Composite::updateBoundingBox(std::shared_ptr<Shape>shape)
+{
+    if(shape->boundingBox()->min_.x < boundingBox_->min_.x)
+    {
+        if(shape->boundingBox()->min_.y < boundingBox_->min_.y)
+        {
+            if(shape->boundingBox()->min_.z < boundingBox_->min_.z)
+            {
+                boundingBox_->min_ = shape->boundingBox()->min_;
+            }
+        }
+    }
+
+    if(shape->boundingBox()->max_.x > boundingBox_->max_.x)
+    {
+        if(shape->boundingBox()->max_.y > boundingBox_->max_.y)
+        {
+            if(shape->boundingBox()->max_.z > boundingBox_->max_.z)
+            {
+                boundingBox_->max_ = shape->boundingBox()->max_;
+            }
+        }
+    }
+}
+
+void Composite::updateBoundingBox(std::shared_ptr<Composite>composite)
+{
+    if(composite->boundingBox()->min_.x < boundingBox_->min_.x)
+    {
+        if(composite->boundingBox()->min_.y < boundingBox_->min_.y)
+        {
+            if(composite->boundingBox()->min_.z < boundingBox_->min_.z)
+            {
+                boundingBox_->min_ = composite->boundingBox()->min_;
+            }
+        }
+    }
+
+    if(composite->boundingBox()->max_.x > boundingBox_->max_.x)
+    {
+        if(composite->boundingBox()->max_.y > boundingBox_->max_.y)
+        {
+            if(composite->boundingBox()->max_.z > boundingBox_->max_.z)
+            {
+                boundingBox_->max_ = composite->boundingBox()->max_;
+            }
+        }
+    }
 }

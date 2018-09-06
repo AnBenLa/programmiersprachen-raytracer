@@ -9,12 +9,15 @@
 #include "color.hpp"
 #include "ray.hpp"
 #include "cylinder.hpp"
+#include "renderer.hpp"
 
-Cylinder::Cylinder(float height,float radius, std::string const& name, std::shared_ptr<Material> const& material):
+Cylinder::Cylinder(glm::vec3 base, float height,float radius, std::string const& name, std::shared_ptr<Material> const& material):
     Shape{name, material},
     height_{height},
     radius_{radius}
     {
+		//transforms the cone so that its alligned with the y axis
+		apply_transformation(glm::vec3{ 0 + base.x,  height + base.y, 0 + base.z }, -M_PI / 2, x_axis, glm::vec3{ radius,radius,height });
         calculateBoundingBox();
     };
 
@@ -24,65 +27,101 @@ std::ostream& Cylinder::print(std::ostream& os) const {
 	return Shape::print(os)<<"Height: "<<height_<<", "<<"Radius: "<<radius_<<"\n";
 }
 
-//not ready yet
 bool Cylinder::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape>& shape)const
-{	return false; 
-    /*
-    //check intersection with infinite cylinder
-    glm::vec3 AB = base_ - top_;
-    glm::vec3 AO = ray.origin - base_;
-    glm::vec3 AOxAB = glm::cross(AB,AO);
-    glm::vec3 VxAB = glm::cross(ray.direction,AB);
-    float ab2 = glm::dot(AB,AB);
-    float a = glm::dot(VxAB,VxAB);
-    float b = 2*glm::dot(VxAB,AOxAB);
-    float c = glm::dot(AOxAB,AOxAB)-(radius_*radius_*ab2);
+{	
+	Ray transformedRay = transformRay(world_transformation_inv_, ray);
 
-    //solve quadratic equation
-    float p = pow(b,2)-4*a*c;
-    if(p<0)
-    {
-        //quadratic equation has no result -> no intersection
-        return false;
-    }
-    else{
-        float x1 = (-b+sqrt(p))/2*a;
-        float x2 = (-b-sqrt(p))/2*a;
-    
-        float x{0.0f};
-        if(x1<x2){
-            float x=x1;
-        }
-        else {float x = x2;}
-        cut_point = ray.origin+ray.direction*x;
+	float t = 0.0f;
+	float a, b, c;
+	a = pow(transformedRay.direction.x, 2) + pow(transformedRay.direction.y, 2);
+	b = 2 * transformedRay.origin.x*transformedRay.direction.x + 2 * transformedRay.origin.y*transformedRay.direction.y;
+	c = pow(transformedRay.origin.x, 2) + pow(transformedRay.origin.y, 2) - 1;
+	float t_1, t_2;
+	t_1 = (-b + sqrt(pow(b, 2) - 4 * a*c)) / (2 * a);
+	t_2 = (-b - sqrt(pow(b, 2) - 4 * a*c)) / (2 * a);
 
-        //check if the intersection is between planes (bottom/top)
-        float cut_distance1;
-        float cut_distance2;
-        glm::intersectRayPlane(cut_point,glm::normalize(AB),base_,AB,cut_distance1);
-        glm::intersectRayPlane(cut_point,glm::normalize(AB),top_,AB,cut_distance2);
-        cut_distance1 = glm::length(base_+AB*cut_distance1);
-        cut_distance2 = glm::length(top_+AB*cut_distance2);
+	if (pow(b, 2) - 4 * a*c > 0) {
+		bool c1 = false;
+		bool c2 = false;
+		glm::vec3 cut_1, cut_2;
+		if (t_1 > 0) {
+			cut_1 = transformedRay.origin + t_1 * transformedRay.direction;
+			if (cut_1.z <= 0.0f && cut_1.z >= -1.0f) {
+				c1 = true;
+			}
+		}
+		if (t_2 > 0) {
+			cut_2 = transformedRay.origin + t_2 * transformedRay.direction;
+			if (cut_2.z <= 0.0f && cut_2.z >= -1.0f) {
+				c2 = true;
+			}
+		}
+		shape = std::make_shared<Cylinder>(base_, height_, radius_, name(), material());
+		bool cut = false;
+		glm::vec3 proj_z;
+		if (c1 && c2) {
+			if (t_2 < t_1) {
+				cut_point = cut_2;
+				distance = t_2;
+				normal = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0.0f });
+				cut = true;
+			}
+			else {
+				cut_point = cut_1;
+				distance = t_1;
+				normal = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0.0f });
+				cut = true;
+			}
+		}
+		else if (c1) {
+			cut_point = cut_1;
+			distance = t_1;
+			normal = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0.0f });
+			cut = true;
+		}
+		else if (c2) {
+			cut_point = cut_2;
+			distance = t_2;
+			normal = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0.0f });
+			cut = true;
+		}
+		Plane plane_1{ glm::vec3{ 0,0,-1 }, glm::vec3{ 0,0,1 } };
+		Plane plane_2{ glm::vec3{ 0,0,0 },	glm::vec3{ 0,0,1 } };
+		float distance_base_1 = (glm::dot(plane_1.normal, plane_1.origin) - glm::dot(transformedRay.origin, plane_1.normal)) / (glm::dot(transformedRay.direction, plane_1.normal));
+		float distance_base_2 = (glm::dot(plane_2.normal, plane_2.origin) - glm::dot(transformedRay.origin, plane_2.normal)) / (glm::dot(transformedRay.direction, plane_2.normal));
+		float distance_base = distance_base_1;
+		if (distance_base_2 > 0 && distance_base_2 < distance_base) {
+			distance_base = distance_base_2;
+		}
+		if (distance_base > 0) {
+			glm::vec3  base_cut = transformedRay.origin + distance_base * transformedRay.direction;
+			if (glm::length(glm::vec3{ base_cut.x, base_cut.y, 0 }) <= 1) {
+				if ((c1 && c2 && distance_base < t_1 && distance_base < t_2) || (c1 && distance_base < t_1) || (c2 && distance_base < t_2)) {
+					cut_point = base_cut;
+					distance = distance_base;
+					normal = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0.0f });
+					cut = true;
+				}
+			}
+		}
+		if (cut) {
 
-        if(cut_distance1+cut_distance2<=glm::length(AB))
-        {
+			glm::vec4 transformed_cut = world_transformation_ * glm::vec4{ cut_point, 1 };
+			glm::vec4 transformed_normal = glm::normalize(glm::transpose(world_transformation_inv_) * glm::vec4{ normal , 0 });
+
+			cut_point = glm::vec3{ transformed_cut.x, transformed_cut.y, transformed_cut.z };
+			normal = glm::vec3{ transformed_normal.x, transformed_normal.y, transformed_normal.z };
 			distance = glm::length(cut_point - ray.origin);
-			shape = std::make_shared<Cylinder>(base_, top_, radius_, name(), material());
 			return true;
-        }   
-        else return false;    
-    }*/
-
+		}
+	}
+	return false;
 }
 
 void Cylinder::calculateBoundingBox()
 {
-    /*glm::vec3 minBbox{base_.x-radius_,base_.y-radius_,base_.z-radius_};
-    glm::vec3 maxBbox{top_.x+radius_,top_.y+radius_,top_.z+radius_};
+    glm::vec3 minBbox{base_.x-radius_,base_.y-radius_,base_.z-height_};
+    glm::vec3 maxBbox{base_.x+radius_,base_.y+radius_,base_.z};
 
-    boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);*/
-}
-
-std::shared_ptr<BoundingBox> Cylinder::boundingBox() const {
-	return boundingBox_;
+    boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);
 }

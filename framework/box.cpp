@@ -105,7 +105,7 @@ bool Box::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::
 			}
 		}
 		glm::vec4 transformed_cut = world_transformation_ * glm::vec4{ closest_cut, 1 };
-		glm::vec4 transformed_normal = glm::transpose(world_transformation_) * glm::vec4{ closest_normal , 0 };
+		glm::vec4 transformed_normal = glm::normalize(glm::transpose(world_transformation_inv_) * glm::vec4{ closest_normal , 0 });
 		cut_point = glm::vec3{ transformed_cut.x, transformed_cut.y, transformed_cut.z };
 		normal = glm::vec3{transformed_normal.x, transformed_normal.y, transformed_normal.z};
 		distance = glm::length(cut_point - ray.origin);
@@ -114,11 +114,6 @@ bool Box::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::
 	}
 	return false;
 };
-
-std::shared_ptr<BoundingBox> Box::boundingBox()const
-{
-	return boundingBox_;
-}
 
 glm::vec3 Box::min() const {
 	return min_;

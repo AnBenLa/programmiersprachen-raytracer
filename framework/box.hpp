@@ -14,7 +14,6 @@ public:
 	bool intersect(Ray const&, float&,glm::vec3&, glm::vec3&, std::shared_ptr<Shape>&) const override;
 	glm::vec3 min() const;
 	glm::vec3 max() const;
-	std::shared_ptr<BoundingBox> boundingBox()const override;
 
 private:
 	glm::vec3 min_;

@@ -116,7 +116,7 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 				if (lineParts[0] == "o") {
 					std::string name = lineParts[1];
 					if (current_comp != nullptr) {
-						current_comp->updateBoundingBox();
+						current_comp->createBoundingBox();
 						if (obj_comp == nullptr) {
 							obj_comp = std::make_shared<Composite>();
 						}
@@ -185,11 +185,11 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 			}
 		}
 		if (current_comp != nullptr) {
-			current_comp->updateBoundingBox();
+			current_comp->createBoundingBox();
 			obj_comp->add(current_comp);
 			std::cout << "Comp: " << current_name << " was added\n";
 		}
-		obj_comp->updateBoundingBox();
+		obj_comp->createBoundingBox();
 		std::cout << "\n" << vertices.size() << " vertices loaded\n";
 		std::cout << shapes << " faces loaded\n";
 		std::cout << "\nOBJ loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;
@@ -205,278 +205,286 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 	while(iss >> word){
 		lineParts.push_back(word);
 	}
-	if (lineParts[0] == "define") {
-		if (lineParts[1] == "material")
-		{
-			std::cout << "Load material ...\n";
-			//creates a new material
-			try {
-				Color ka{ std::stof(lineParts[3],NULL),std::stof(lineParts[4],NULL),std::stof(lineParts[5],NULL) };
-				Color kd{ std::stof(lineParts[6],NULL),std::stof(lineParts[7],NULL),std::stof(lineParts[8],NULL) };
-				Color ks{ std::stof(lineParts[9],NULL),std::stof(lineParts[10],NULL),std::stof(lineParts[11],NULL) };
-				float m{ std::stof(lineParts[12],NULL) };
-				std::shared_ptr<Material>mat;
-				if (lineParts.size() == 13) {
-					mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m);
-				} else {
-					float glossy = std::stof(lineParts[13], NULL);
-					mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m,glossy);
-				}
-				std::cout << "Material: " << *mat << "\n";
-				scene.mat_map_.insert(std::pair<std::string, std::shared_ptr<Material>>(mat->name, mat));
-			}
-			catch (std::invalid_argument arg)
+	if (lineParts.size() > 0) {
+		if (lineParts[0] == "define") {
+			if (lineParts[1] == "material")
 			{
-				std::cout << "Something went wrong, while loading material. Check format!\n";
-				std::cout << "Throws exception : " << arg.what() << "\n";
-			}
-		}
-		if (lineParts[1] == "shape")
-		{
-			std::cout << "Load shape ...\n";
-			if (lineParts[2] == "box") {
+				std::cout << "Load material ...\n";
+				//creates a new material
 				try {
-					std::string name = lineParts[3];
-					glm::vec3 min = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
-					glm::vec3 max = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
-					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[10]);
-					std::shared_ptr<Box> box = std::make_shared<Box>(min, max, name, mat);
-					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, box));
-					std::cout << "Box: " << *box << "\n";
+					Color ka{ std::stof(lineParts[3],NULL),std::stof(lineParts[4],NULL),std::stof(lineParts[5],NULL) };
+					Color kd{ std::stof(lineParts[6],NULL),std::stof(lineParts[7],NULL),std::stof(lineParts[8],NULL) };
+					Color ks{ std::stof(lineParts[9],NULL),std::stof(lineParts[10],NULL),std::stof(lineParts[11],NULL) };
+					float m{ std::stof(lineParts[12],NULL) };
+					std::shared_ptr<Material>mat;
+					if (lineParts.size() == 13) {
+						mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m);
+					}
+					else {
+						float glossy = std::stof(lineParts[13], NULL);
+						mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m, glossy);
+					}
+					std::cout << "Material: " << *mat << "\n";
+					scene.mat_map_.insert(std::pair<std::string, std::shared_ptr<Material>>(mat->name, mat));
 				}
 				catch (std::invalid_argument arg)
 				{
-					std::cout << "Something went wrong, while loading the box. Check format!\n";
+					std::cout << "Something went wrong, while loading material. Check format!\n";
 					std::cout << "Throws exception : " << arg.what() << "\n";
 				}
 			}
-			if (lineParts[2] == "sphere") {
-				try {
-					std::string name = lineParts[3];
-					glm::vec3 center = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
-					int radius = std::stof(lineParts[7], NULL);
-					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[8]);
-					std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(center, radius, name, mat);
-					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, sphere));
-					std::cout << "Sphere: " << *sphere << "\n";
-				}
-				catch (std::invalid_argument arg)
-				{
-					std::cout << "Something went wrong, while loading the sphere. Check format!\n";
-					std::cout << "Throws exception : " << arg.what() << "\n";
-				}
-			}
-			if (lineParts[2] == "triangle") {
-				try {
-					std::string name = lineParts[3];
-					glm::vec3 a = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
-					glm::vec3 b = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
-					glm::vec3 c = glm::vec3{ std::stof(lineParts[10], NULL), std::stof(lineParts[11], NULL), std::stof(lineParts[12], NULL) };
-					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[13]);
-					std::shared_ptr<Triangle> triangle = std::make_shared<Triangle>(a, b,  c,name, mat);
-					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, triangle));
-					std::cout << "Triangle: " << *triangle << "\n";
-				}
-				catch (std::invalid_argument arg)
-				{
-					std::cout << "Something went wrong, while loading the triangle. Check format!\n";
-					std::cout << "Throws exception : " << arg.what() << "\n";
-				}
-			}
-			if (lineParts[2] == "cone") {
-				try {
-					std::string name = lineParts[3];
-					glm::vec3 base = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
-					glm::vec3 peak = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
-					float radius = std::stof(lineParts[10], NULL);
-					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
-					std::shared_ptr<Cone> cone = std::make_shared<Cone>(base, peak, radius, name, mat);
-					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, cone));
-					std::cout << "Cone: " << *cone << "\n";
-				}
-				catch (std::invalid_argument arg)
-				{
-					std::cout << "Something went wrong, while loading the cone. Check format!\n";
-					std::cout << "Throws exception : " << arg.what() << "\n";
-				}
-			}
-			/*if(lineParts[2] == "cylinder")
+			if (lineParts[1] == "shape")
 			{
-				try{
-					std::string name = lineParts[3];
-					glm::vec3 base = glm::vec3{std::stof(lineParts[4],NULL),std::stof(lineParts[5],NULL),std::stof(lineParts[6],NULL)};
-					glm::vec3 top = glm::vec3{std::stof(lineParts[7],NULL),std::stof(lineParts[8],NULL),std::stof(lineParts[9],NULL)};
-					float radius = std::stof(lineParts[10],NULL);
-					std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[11]);
-					std::shared_ptr<Cylinder>cylinder = std::make_shared<Cylinder>(base,top,radius,name,mat);
-					shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, cylinder));
-					std::cout<<"Cylinder: "<<*cylinder<<"\n";
+				std::cout << "Load shape ...\n";
+				if (lineParts[2] == "box") {
+					try {
+						std::string name = lineParts[3];
+						glm::vec3 min = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
+						glm::vec3 max = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
+						std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[10]);
+						std::shared_ptr<Box> box = std::make_shared<Box>(min, max, name, mat);
+						shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, box));
+						std::cout << "Box: " << *box << "\n";
+					}
+					catch (std::invalid_argument arg)
+					{
+						std::cout << "Something went wrong, while loading the box. Check format!\n";
+						std::cout << "Throws exception : " << arg.what() << "\n";
+					}
 				}
-				catch (std::invalid_argument arg)
+				if (lineParts[2] == "sphere") {
+					try {
+						std::string name = lineParts[3];
+						glm::vec3 center = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
+						int radius = std::stof(lineParts[7], NULL);
+						std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[8]);
+						std::shared_ptr<Sphere> sphere = std::make_shared<Sphere>(center, radius, name, mat);
+						shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, sphere));
+						std::cout << "Sphere: " << *sphere << "\n";
+					}
+					catch (std::invalid_argument arg)
+					{
+						std::cout << "Something went wrong, while loading the sphere. Check format!\n";
+						std::cout << "Throws exception : " << arg.what() << "\n";
+					}
+				}
+				if (lineParts[2] == "triangle") {
+					try {
+						std::string name = lineParts[3];
+						glm::vec3 a = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
+						glm::vec3 b = glm::vec3{ std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL), std::stof(lineParts[9], NULL) };
+						glm::vec3 c = glm::vec3{ std::stof(lineParts[10], NULL), std::stof(lineParts[11], NULL), std::stof(lineParts[12], NULL) };
+						std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[13]);
+						std::shared_ptr<Triangle> triangle = std::make_shared<Triangle>(a, b, c, name, mat);
+						shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, triangle));
+						std::cout << "Triangle: " << *triangle << "\n";
+					}
+					catch (std::invalid_argument arg)
+					{
+						std::cout << "Something went wrong, while loading the triangle. Check format!\n";
+						std::cout << "Throws exception : " << arg.what() << "\n";
+					}
+				}
+				if (lineParts[2] == "cone") {
+					try {
+						std::string name = lineParts[3];
+						glm::vec3 base = glm::vec3{ std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL), std::stof(lineParts[6], NULL) };
+						float height = std::stof(lineParts[7], NULL);
+						float radius = std::stof(lineParts[8], NULL);
+						std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[9]);
+						std::shared_ptr<Cone> cone = std::make_shared<Cone>(base, height, radius, name, mat);
+						shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, cone));
+						std::cout << "Cone: " << *cone << "\n";
+					}
+					catch (std::invalid_argument arg)
+					{
+						std::cout << "Something went wrong, while loading the cone. Check format!\n";
+						std::cout << "Throws exception : " << arg.what() << "\n";
+					}
+				}
+				if (lineParts[2] == "cylinder")
 				{
-					std::cout<<"Something went wrong, while loading the cylinder. Check format!\n";
-					std::cout<<"Throws exception: "<<arg.what()<<"\n";
+					try {
+						std::string name = lineParts[3];
+						glm::vec3 base = glm::vec3{ std::stof(lineParts[4],NULL),std::stof(lineParts[5],NULL),std::stof(lineParts[6],NULL) };
+						float height = std::stof(lineParts[7], NULL);
+						float radius = std::stof(lineParts[8], NULL);
+						std::shared_ptr<Material> mat = scene.mat_map_.at(lineParts[9]);
+						std::shared_ptr<Cylinder>cylinder = std::make_shared<Cylinder>(base, height, radius, name, mat);
+						shape_map.insert(std::pair<std::string, std::shared_ptr<Shape>>(name, cylinder));
+						std::cout << "Cylinder: " << *cylinder << "\n";
+					}
+					catch (std::invalid_argument arg)
+					{
+						std::cout << "Something went wrong, while loading the cylinder. Check format!\n";
+						std::cout << "Throws exception: " << arg.what() << "\n";
+					}
 				}
-			}*/
-			if (lineParts[2] == "composite")
-			{
-				try {
-					std::string name = lineParts[3];
-					std::vector<std::shared_ptr<Shape>> shapes;
-					std::vector<std::shared_ptr<Composite>> composites;
-					for (int i = 4; i < lineParts.size(); ++i) {
-						std::string current_shape = lineParts[i];
-						if (shape_map.find(current_shape) != shape_map.end()) {
-							shapes.push_back(shape_map.at(current_shape));
-						} else if (composite_map.find(current_shape) != composite_map.end()) {
-							composites.push_back(composite_map.at(current_shape));
-						} else {
-							std::cout << "the composite could not be added correctly";
+				if (lineParts[2] == "composite")
+				{
+					try {
+						std::string name = lineParts[3];
+						std::vector<std::shared_ptr<Shape>> shapes;
+						std::vector<std::shared_ptr<Composite>> composites;
+						for (int i = 4; i < lineParts.size(); ++i) {
+							std::string current_shape = lineParts[i];
+							if (shape_map.find(current_shape) != shape_map.end()) {
+								shapes.push_back(shape_map.at(current_shape));
+							}
+							else if (composite_map.find(current_shape) != composite_map.end()) {
+								composites.push_back(composite_map.at(current_shape));
+							}
+							else {
+								std::cout << "the composite could not be added correctly";
+							}
 						}
+						std::shared_ptr<Composite> composite = std::make_shared<Composite>(name, shapes, composites);
+						composite_map.insert(std::pair<std::string, std::shared_ptr<Composite>>(name, composite));
+						if (name == "root") {
+							scene.root_composite_ = composite;
+						}
+						std::cout << "Composite: " << name << "\n\n";
 					}
-					std::shared_ptr<Composite> composite = std::make_shared<Composite>(name, shapes, composites);
-					composite_map.insert(std::pair<std::string, std::shared_ptr<Composite>>(name, composite));
-					if (name == "root") {
-						scene.root_composite_ = composite;
+					catch (std::invalid_argument arg)
+					{
+						std::cout << "Something went wrong, while loading the ccomposite. Check format!\n";
+						std::cout << "Throws exception: " << arg.what() << "\n";
 					}
-					std::cout << "Composite: " << name << "\n\n";
+				}
+			}
+			if (lineParts[1] == "light") {
+				std::cout << "Load light ...\n";
+				try {
+					std::string name = lineParts[2];
+					glm::vec3 position = glm::vec3{ std::stof(lineParts[3], NULL), std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL) };
+					Color color{ std::stof(lineParts[6], NULL), std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL) };
+					double brightness = std::stof(lineParts[9], NULL);
+					std::shared_ptr<Light> light = std::make_shared<Light>(name, position, color, brightness);
+					scene.light_vec_.push_back(light);
+					std::cout << "Light: " << *light << "\n";
 				}
 				catch (std::invalid_argument arg)
 				{
-					std::cout << "Something went wrong, while loading the ccomposite. Check format!\n";
-					std::cout << "Throws exception: " << arg.what() << "\n";
+					std::cout << "Something went wrong, while loading the light. Check format!\n";
+					std::cout << "Throws exception : " << arg.what() << "\n";
 				}
 			}
-		}
-		if (lineParts[1] == "light") {
-			std::cout << "Load light ...\n";
-			try {
-				std::string name = lineParts[2];
-				glm::vec3 position = glm::vec3{ std::stof(lineParts[3], NULL), std::stof(lineParts[4], NULL), std::stof(lineParts[5], NULL) };
-				Color color{ std::stof(lineParts[6], NULL), std::stof(lineParts[7], NULL), std::stof(lineParts[8], NULL) };
-				double brightness = std::stof(lineParts[9], NULL);
-				std::shared_ptr<Light> light = std::make_shared<Light>(name, position, color, brightness);
-				scene.light_vec_.push_back(light);
-				std::cout << "Light: " << *light << "\n";
+			if (lineParts[1] == "camera") {
+				std::cout << "Load camera ...\n";
+				try {
+					std::string name = lineParts[2];
+					double fov = stof(lineParts[3]);
+					glm::vec3 pos = glm::vec3{ stof(lineParts[4]), stof(lineParts[5]), stof(lineParts[6]) };
+					glm::vec3 dir = glm::normalize(glm::vec3{ stof(lineParts[7]), stof(lineParts[8]), stof(lineParts[9]) });
+					glm::vec3 up = glm::normalize(glm::vec3{ stof(lineParts[10]), stof(lineParts[11]), stof(lineParts[12]) });
+					std::shared_ptr<Camera> camera = std::make_shared<Camera>(name, pos, dir, up, fov);
+					scene.camera_ = camera;
+					std::cout << "Camera: " << *camera << "\n";
+				}
+				catch (std::invalid_argument arg)
+				{
+					std::cout << "Something went wrong, while loading the camera. Check format!\n";
+					std::cout << "Throws exception : " << arg.what() << "\n";
+				}
 			}
-			catch (std::invalid_argument arg)
-			{
-				std::cout << "Something went wrong, while loading the light. Check format!\n";
+			if (lineParts[1] == "mtl") {
+				std::string path = lineParts[2];
+				readMTL_File(path, scene);
+			}
+			if (lineParts[1] == "obj") {
+				std::string path = lineParts[2];
+				readOBJ_File(path, scene, obj_comp);
+			}
+		}
+		if (lineParts[0] == "ambient") {
+			std::cout << "Load ambient ...\n";
+			try {
+				Color color{ std::stof(lineParts[1],NULL),std::stof(lineParts[2],NULL),std::stof(lineParts[3],NULL) };
+				std::shared_ptr<Ambiente> am = std::make_shared<Ambiente>(color);
+				scene.ambiente_ = am;
+				std::cout << "Ambiente: " << *am << "\n";
+			}
+			catch (std::invalid_argument arg) {
+				std::cout << "Something went wrong, while loading the ambiente. Check format!\n";
 				std::cout << "Throws exception : " << arg.what() << "\n";
 			}
 		}
-		if (lineParts[1] == "camera") {
-			std::cout << "Load camera ...\n";
+		if (lineParts[0] == "transform") {
+			std::cout << "Transform ...\n";
 			try {
-				std::string name = lineParts[2];
-				double fov = stof(lineParts[3]);
-				glm::vec3 pos = glm::vec3{ stof(lineParts[4]), stof(lineParts[5]), stof(lineParts[6]) };
-				glm::vec3 dir = glm::normalize(glm::vec3{ stof(lineParts[7]), stof(lineParts[8]), stof(lineParts[9]) });
-				glm::vec3 up  = glm::normalize(glm::vec3{ stof(lineParts[10]), stof(lineParts[11]), stof(lineParts[12]) });
-				std::shared_ptr<Camera> camera = std::make_shared<Camera>(name, pos, dir, up , fov);
-				scene.camera_ = camera;
-				std::cout << "Camera: " << *camera << "\n";
+				std::string object = lineParts[1];
+				std::shared_ptr<Shape> shape = nullptr;
+				std::shared_ptr<Camera> camera = nullptr;
+				if (shape_map.find(object) != shape_map.end()) {
+					shape = shape_map.at(object);
+				}
+				else if (scene.camera_ != nullptr && scene.camera_->name_ == object) {
+					camera = scene.camera_;
+				}
+				if (shape != nullptr) {
+
+					if (lineParts[2] == "translate")
+					{
+						glm::vec3 translation{ stof(lineParts[3]),stof(lineParts[4]),stof(lineParts[5]) };
+						shape->apply_transformation(translation, 0, x_axis, glm::vec3{ 1.0f,1.0f,1.0f });
+					}
+					else if (lineParts[2] == "rotate")
+					{
+						float angle{ stof(lineParts[3]) };
+						angle = (angle * 2 * M_PI) / 360;
+						Axis axis;
+						if (lineParts[4] == "x")
+						{
+							axis = x_axis;
+						}
+						else if (lineParts[4] == "y")
+						{
+							axis = y_axis;
+						}
+						else
+						{
+							axis = z_axis;
+						}
+						shape->apply_transformation(glm::vec3{ 0.0f,0.0f,0.0f }, angle, axis, glm::vec3{ 1.0f,1.0f,1.0f });
+
+					}
+					else if (lineParts[2] == "scale")
+					{
+						glm::vec3 scale{ stof(lineParts[3]),stof(lineParts[4]),stof(lineParts[5]) };
+						shape->apply_transformation(glm::vec3{ 0.0f,0.0f,0.0f }, 0, x_axis, scale);
+					}
+
+
+				}
+				else if (camera != nullptr) {
+					if (lineParts[2] == "rotate") {
+						glm::mat4x4 rotation = glm::rotate(stof(lineParts[3]), glm::vec3{ stof(lineParts[4]), stof(lineParts[5]), stof(lineParts[6]) });
+						glm::vec4 n_4 = glm::vec4{ camera->direction_, 0 } *rotation;
+						glm::vec4 up_4 = glm::vec4{ camera->up_, 0 } *rotation;
+						glm::vec3 n = glm::normalize(glm::vec3{ n_4.x, n_4.y , n_4.z });
+						glm::vec3 up = glm::vec3{ up_4.x, up_4.y , up_4.z };
+						glm::vec3 u = glm::normalize(glm::cross(n, up));
+						glm::vec3 v = glm::normalize(glm::cross(u, n));
+						camera->transformation_ += glm::mat4{
+							glm::vec4{u,0.0f},
+							glm::vec4{v,0.0f},
+							glm::vec4{-n,0.0f},
+							glm::vec4{0.0f}
+						};
+					}
+					else if (lineParts[2] == "translate") {
+						camera->transformation_ += glm::mat4{
+							glm::vec4{0.0f},
+							glm::vec4{0.0f},
+							glm::vec4{0.0f},
+							glm::vec4{stof(lineParts[3]), stof(lineParts[4]), stof(lineParts[5]), 1.0f} };
+					}
+				}
 			}
-			catch (std::invalid_argument arg)
-			{
-				std::cout << "Something went wrong, while loading the camera. Check format!\n";
+			catch (std::invalid_argument arg) {
+				std::cout << "Something went wrong, while transforming an object or camera. Check format!\n";
 				std::cout << "Throws exception : " << arg.what() << "\n";
 			}
-		}
-		if(lineParts[1] == "mtl"){
-			std::string path = lineParts[2];
-			readMTL_File(path, scene);
-		}
-		if(lineParts[1] == "obj"){
-			std::string path = lineParts[2];
-			readOBJ_File(path, scene, obj_comp);
-		}
-	}
-	if (lineParts[0] == "ambient") {
-		std::cout << "Load ambient ...\n";
-		try {
-			Color color{ std::stof(lineParts[1],NULL),std::stof(lineParts[2],NULL),std::stof(lineParts[3],NULL) };
-			std::shared_ptr<Ambiente> am = std::make_shared<Ambiente>(color);
-			scene.ambiente_ = am;
-			std::cout << "Ambiente: " << *am << "\n";
-		}
-		catch (std::invalid_argument arg) {
-			std::cout << "Something went wrong, while loading the ambiente. Check format!\n";
-			std::cout << "Throws exception : " << arg.what() << "\n";
-		}
-	}
-	if (lineParts[0] == "transform") {
-		std::cout << "Transform ...\n";
-		try {
-			std::string object = lineParts[1];
-			std::shared_ptr<Shape> shape = nullptr;
-			std::shared_ptr<Camera> camera = nullptr;
-			if (shape_map.find(object) != shape_map.end()) {
-				shape = shape_map.at(object);
-			} else if (scene.camera_ != nullptr && scene.camera_->name_ == object) {
-				camera = scene.camera_;
-			}
-			if (shape != nullptr) {
-				
-				if(lineParts[2] == "translate")
-				{
-					glm::vec3 translation{stof(lineParts[3]),stof(lineParts[4]),stof(lineParts[5])};
-					shape->apply_transformation(translation,0,x_axis,glm::vec3{1.0f,1.0f,1.0f});
-				}
-				else if(lineParts[2] == "rotate")
-				{
-					float angle{stof(lineParts[3])};
-					angle = (angle * 2 * M_PI) / 360;
-					Axis axis;
-					if(lineParts[4]=="x")
-					{
-						axis = x_axis;
-					}
-					else if(lineParts[4]=="y")
-					{
-						axis = y_axis;
-					}
-					else
-					{
-						axis = z_axis;
-					}
-					shape->apply_transformation(glm::vec3{0.0f,0.0f,0.0f},angle,axis,glm::vec3{1.0f,1.0f,1.0f});
-
-				}
-				else if(lineParts[2] == "scale")
-				{
-					glm::vec3 scale{stof(lineParts[3]),stof(lineParts[4]),stof(lineParts[5])};
-					shape->apply_transformation(glm::vec3{0.0f,0.0f,0.0f},0,x_axis,scale);
-				}
-
-
-			} else if (camera != nullptr) {
-				if (lineParts[2] == "rotate") {
-					glm::mat4x4 rotation = glm::rotate(stof(lineParts[3]), glm::vec3{ stof(lineParts[4]), stof(lineParts[5]), stof(lineParts[6]) });
-					glm::vec4 n_4 = glm::vec4{ camera->direction_, 0 } * rotation;
-					glm::vec4 up_4 = glm::vec4{ camera->up_, 0 } *rotation;
-					glm::vec3 n = glm::normalize(glm::vec3{ n_4.x, n_4.y , n_4.z });
-					glm::vec3 up = glm::vec3{ up_4.x, up_4.y , up_4.z };
-					glm::vec3 u = glm::normalize(glm::cross(n, up));
-					glm::vec3 v = glm::normalize(glm::cross(u, n));
-					camera->transformation_ += glm::mat4{ 
-						glm::vec4{u,0.0f}, 
-						glm::vec4{v,0.0f}, 
-						glm::vec4{-n,0.0f}, 
-						glm::vec4{0.0f} 
-					};
-				} else if (lineParts[2] == "translate") {
-					camera->transformation_ += glm::mat4{ 
-						glm::vec4{0.0f}, 
-						glm::vec4{0.0f}, 
-						glm::vec4{0.0f}, 
-						glm::vec4{stof(lineParts[3]), stof(lineParts[4]), stof(lineParts[5]), 1.0f} };
-				}
-			}
-		}
-		catch (std::invalid_argument arg) {
-			std::cout << "Something went wrong, while transforming an object or camera. Check format!\n";
-			std::cout << "Throws exception : " << arg.what() << "\n";
 		}
 	}
 }
@@ -504,7 +512,7 @@ static void readSDF_File(std::string const& path,Scene& scene) {
 		else if (scene.root_composite_ == nullptr) {
 			scene.root_composite_ = obj_comp;
 		}
-		scene.root_composite_->updateBoundingBox();
+		scene.root_composite_->createBoundingBox();
 		std::cout << "\nScene loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;
 	}
 };

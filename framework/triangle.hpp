@@ -16,7 +16,6 @@ public:
 	glm::vec3 point_a() const;
 	glm::vec3 point_b() const;
 	glm::vec3 point_c() const;
-	std::shared_ptr<BoundingBox> boundingBox()const override;
 	
 private:
 	glm::vec3 a_;
