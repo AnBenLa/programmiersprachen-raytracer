@@ -15,7 +15,7 @@ Cone::Cone(glm::vec3 base, float height, float radius ,std::string name, std::sh
 	Shape{ name, material }, base_{ base }, height_{ height }, radius_{radius} 
 	{
 		//transforms the cone so that it stands on the y axis with the base at the origin
-		apply_transformation(glm::vec3{ 0, height, 0 }, -M_PI / 2, x_axis, glm::vec3{ radius,radius,height });
+		apply_transformation(glm::vec3{ 0,  height, 0 }, -M_PI/2, x_axis, glm::vec3{ radius,radius,height });
 		calculateBoundingBox();
 	};
 
@@ -61,12 +61,14 @@ bool Cone::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm:
 				cut_point = cut_2;
 				distance = t_2;
 				proj_z = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0 });
+				normal = glm::normalize(glm::vec3{ proj_z.x, proj_z.y , 1.0f });
 				cut =  true;
 			}
 			else {
 				cut_point = cut_1;
 				distance = t_1;
 				proj_z = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0 });
+				normal = glm::normalize(glm::vec3{ proj_z.x, proj_z.y , 1.0f });
 				cut = true;
 			}
 		}
@@ -74,16 +76,29 @@ bool Cone::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm:
 			cut_point = cut_1;
 			distance = t_1;
 			proj_z = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0 });
+			normal = glm::normalize(glm::vec3{ proj_z.x, proj_z.y , 1.0f });
 			cut = true;
 		}
 		else if (c2) {
 			cut_point = cut_2;
 			distance = t_2;
 			proj_z = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0 });
+			normal = glm::normalize(glm::vec3{ proj_z.x, proj_z.y , 1.0f });
 			cut = true;
 		}
+		Plane plane{ glm::vec3{ 0,0,-1 }, glm::vec3{ 0,0,1 } };
+		float distance_base = (glm::dot(plane.normal, plane.origin) - glm::dot(transformedRay.origin, plane.normal)) / (glm::dot(transformedRay.direction, plane.normal));
+		glm::vec3  base_cut = transformedRay.origin + distance_base * transformedRay.direction;
+		if (glm::length(base_cut - glm::vec3{ 0,0,-1 }) <= 1) {
+			if ((c1 && c2 && distance_base < t_1 && distance_base < t_2) || (c1 && distance_base < t_1) || (c2 && distance_base < t_2)) {
+				cut_point = base_cut;
+				distance = distance_base;
+				normal = glm::normalize(glm::vec3{ 0, 0 , -1.0f });
+				cut = true;
+			}
+		}
 		if (cut) {
-			normal = glm::normalize(glm::vec3{ proj_z.x, proj_z.y , 1.0f });
+			
 			glm::vec4 transformed_cut = world_transformation_ * glm::vec4{ cut_point, 1 };
 			glm::vec4 transformed_normal = glm::normalize(glm::transpose(world_transformation_inv_) * glm::vec4{ normal , 0 });
 			
