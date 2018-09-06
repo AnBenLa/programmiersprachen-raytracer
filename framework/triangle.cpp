@@ -10,6 +10,7 @@
 #include "ray.hpp"
 #include "plane.hpp"
 #include "triangle.hpp"
+#include "renderer.hpp"
 
 
 Triangle::Triangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, std::string name, std::shared_ptr<Material> material) :
@@ -31,25 +32,27 @@ std::ostream& Triangle::print(std::ostream& os) const {
 
 //M�ller�Trumbore ray-triangle intersection algorithm was used
 bool Triangle::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::vec3& normal, std::shared_ptr<Shape>& shape) const {
+	Ray transformedRay = transformRay(world_transformation_inv_, ray);
+
 	const float EPSILON = 0.0000001;
 	glm::vec3 a_b, a_c, h, s, q;
 	float a, f, u, v;
 	a_b = b_ - a_;
 	a_c = c_ - a_;
-	h = glm::cross(ray.direction,a_c);
+	h = glm::cross(transformedRay.direction,a_c);
 	a = glm::dot(a_b,h);
 	//the ray is parallel
 	if (a > -EPSILON && a < EPSILON) {
 		return false;
 	}
 	f = 1 / a;
-	s = ray.origin - a_;
+	s = transformedRay.origin - a_;
 	u = f * (glm::dot(s,h));
 	if (u < 0.0 || u > 1.0) {
 		return false;
 	}
 	q = glm::cross(s,a_b);
-	v = f * glm::dot(ray.direction,q);
+	v = f * glm::dot(transformedRay.direction,q);
 	if (v < 0.0 || u + v > 1.0) {
 		return false;
 	}
@@ -57,13 +60,19 @@ bool Triangle::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, 
 	float t = f * glm::dot(a_c,q);
 	if (t > EPSILON) // ray intersection
 	{
-		cut_point = ray.origin + ray.direction * t;
-		distance = glm::length(cut_point - ray.origin);
+		cut_point = transformedRay.origin + transformedRay.direction * t;
 		if(cust_normal_){
 			normal = glm::normalize(normal_);
 		} else {
 			normal = glm::normalize(glm::cross(a_b, a_c));
 		}
+
+		glm::vec4 transformed_cut = world_transformation_ * glm::vec4{ cut_point, 1 };
+		glm::vec4 transformed_normal = glm::normalize(glm::transpose(world_transformation_inv_) * glm::vec4{ normal , 0 });
+
+		cut_point = glm::vec3{ transformed_cut.x, transformed_cut.y, transformed_cut.z };
+		normal = glm::vec3{ transformed_normal.x, transformed_normal.y, transformed_normal.z };
+		distance = glm::length(cut_point - ray.origin);
 		shape = std::make_shared<Triangle>(a_, b_, c_, name(), material());
 		return true;
 	}
