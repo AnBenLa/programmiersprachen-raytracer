@@ -127,8 +127,8 @@ float Cone::radius() const {
 
 void Cone::calculateBoundingBox()
 {
-	glm::vec3 minBbox{base_.x-radius_,base_.y-radius_,base_.z - height_};
-    glm::vec3 maxBbox{base_.x+radius_,base_.y+radius_,base_.z+radius_};
+	glm::vec3 minBbox{-1, -1 , -1};
+    glm::vec3 maxBbox{1, 1, 0};
 
     boundingBox_= std::make_shared<BoundingBox>(minBbox,maxBbox);
 }

@@ -85,21 +85,21 @@ std::shared_ptr<BoundingBox> Shape::boundingBox()const
             return v1.x<v2.x;
         });
         boundingBox_->min_.x=coords.begin()->x;
-        boundingBox_->max_.x=coords.end()--->x;
+        boundingBox_->max_.x=coords.at(coords.size()-1).x;
 
         std::sort(coords.begin(),coords.end(),[](glm::vec3 const& v1,glm::vec3 const& v2)
         ->bool{
             return v1.y<v2.y;
         });
         boundingBox_->min_.y=coords.begin()->y;
-        boundingBox_->max_.y=coords.end()--->y;
+        boundingBox_->max_.y= coords.at(coords.size() - 1).y;
 
         std::sort(coords.begin(),coords.end(),[](glm::vec3 const& v1,glm::vec3 const& v2)
         ->bool{
             return v1.z<v2.z;
         });    
         boundingBox_->min_.z=coords.begin()->z;
-        boundingBox_->max_.y=coords.end()--->z;
+        boundingBox_->max_.z= coords.at(coords.size() - 1).z;
 
         return boundingBox_;
     }

@@ -20,7 +20,6 @@ class Composite : Shape
         void add(std::shared_ptr<Composite>const& child);
         bool intersect(Ray const& incoming_ray,float& distance,glm::vec3& cut_point, glm::vec3& normal_vec, std::shared_ptr<Shape>& shape)const;
         std::ostream& print(std::ostream& os)const;
-        void apply_transformation(glm::vec3 const& translation,float rotatation,Axis axis,glm::vec3 const& scale);
         
         //calculates bounding box for the whole composite for performance
         void createBoundingBox();

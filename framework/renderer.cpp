@@ -152,7 +152,7 @@ Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 con
 //calculates refraction
 Color Renderer::calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step)
 {
-
+	return Color{ 0.0f,0.0f,0.0f };
 }
 
 void Renderer::fresnel(float refraction_index,glm::vec3 const& normal_Hit,float& refl_mix,float& refr_mix)
