@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
   #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-  readSDF_File("C:\\Test.sdf", *scene);
+  readSDF_File("C:\\test2.sdf", *scene);
   #else
   readSDF_File("/home/anbenla/raytracer/programmiersprachen-raytracer/Übung-7/Simple-Scene.sdf",*scene);
   #endif

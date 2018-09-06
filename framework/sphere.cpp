@@ -29,7 +29,11 @@ bool Sphere::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, gl
 	//std::cout<<transformedRay.origin.x<<","<<transformedRay.origin.y<<","<<transformedRay.origin.z<<"\n";
 	bool hit_found = glm::intersectRaySphere(transformedRay.origin, glm::normalize(transformedRay.direction), center_, radius_, cut_point , normal);
 	if (hit_found) {
-		distance = glm::length(cut_point - transformedRay.origin);
+		glm::vec4 transformed_cut = world_transformation_ * glm::vec4{ cut_point, 1 };
+		glm::vec4 transformed_normal = glm::normalize(glm::transpose(world_transformation_inv_) * glm::vec4{ normal , 0 });
+		cut_point = glm::vec3{ transformed_cut.x, transformed_cut.y, transformed_cut.z };
+		normal = glm::vec3{ transformed_normal.x, transformed_normal.y, transformed_normal.z };
+		distance = glm::length(cut_point - ray.origin);
 		shape = std::make_shared<Sphere>(center_, radius_, name(), material());
 		return true;
 	}
