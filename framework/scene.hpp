@@ -222,7 +222,14 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					}
 					else {
 						float glossy = std::stof(lineParts[13], NULL);
-						mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m, glossy);
+						/*if(lineParts.size() == 14){
+							float n = std::stof(lineParts[14], NULL);
+							mat = std::make_shared<Material>(lineParts[2],ka,kd,ks,m,glossy,n)
+						}
+						else {*/
+							mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m, glossy);
+						//}
+						
 					}
 					std::cout << "Material: " << *mat << "\n";
 					scene.mat_map_.insert(std::pair<std::string, std::shared_ptr<Material>>(mat->name, mat));

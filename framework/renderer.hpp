@@ -26,6 +26,7 @@ public:
   void write(Pixel const& p);
   Color calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step);
   Color calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step);
+  Color calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step);
   Color calculate_ambiente(std::shared_ptr<Shape> shape, Scene const& scene);
   Color calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene);
   Color calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene);
@@ -43,6 +44,9 @@ private:
   std::vector<Color> color_buffer_;
   std::string filename_;
   PpmWriter ppm_;
+
+  //calculates the mix_values of Refraction + Reflection 
+  void fresnel(float refraction_index,glm::vec3 const& normal_Hit,float& refl_mix,float& refr_mix);
 };
 
 Ray transformRay(glm::mat4 const& mat, Ray const& ray);

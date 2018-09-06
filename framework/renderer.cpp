@@ -107,11 +107,23 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	Color specular = calculate_specular(shape, cut, normal, scene);
 
 	if (shape->material()->glossy > 0) {
-		Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
-		final_value = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
-	}else {
-		final_value = ambient + diffuse + specular;
+		/*if(shape->material()->n>0)
+		{
+			Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
+			Color refraction = calculate_refraction(shape, cut, normal, scene, ray, step);	
+			float refl_mix;
+			float refr_mix;
+			fresnel(shape->material.n,normal,refl_mix,refr_mix);
+			final_value = reflection*refl_mix+refraction*(1-refl_mix);			
+		}
+		else {*/
+			Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
+			final_value = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
+		//}
 	}
+	else {
+	final_value = ambient + diffuse + specular;}
+
 	return  final_value;
 }
 
@@ -135,6 +147,17 @@ Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 con
 			return Color{ 0,0,0 };
 		}
 	}
+}
+
+//calculates refraction
+Color Renderer::calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step)
+{
+
+}
+
+void Renderer::fresnel(float refraction_index,glm::vec3 const& normal_Hit,float& refl_mix,float& refr_mix)
+{
+
 }
 
 //do you really have to multiply two colors?
@@ -252,3 +275,4 @@ Ray transformRay(glm::mat4 const& mat, Ray const& ray)
 	//apply to Ray
 	return Ray{glm::vec3{origin.x,origin.y,origin.z},glm::vec3{direction.x,direction.y,direction.z}};
 }
+
