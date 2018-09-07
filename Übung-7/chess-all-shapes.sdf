@@ -1,6 +1,6 @@
 # materials
 define material red     1 0 0 1 0 0 1 0 0 810 	0.5
-define material blue    0 0 1 0 0 1 1 1 1 810 	0.5
+define material blue    0 0 1 0 0 1 1 1 1 810 	0.1 1.5
 define material green   0 1 0 0 1 0 0 1 0 810 	0.5
 define material purple  1 0 1 1 0 1 1 0 1 810   0.5
 define material black   0.2 0.2 0.2 0 0 0 0.2 0.2 0.2 10 0.1

@@ -107,19 +107,23 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	Color specular = calculate_specular(shape, cut, normal, scene);
 
 	if (shape->material()->glossy > 0) {
-		/*if(shape->material()->n>0)
+		if(shape->material()->n>0)
 		{
 			Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
-			Color refraction = calculate_refraction(shape, cut, normal, scene, ray, step);	
 			float refl_mix;
 			float refr_mix;
-			fresnel(shape->material.n,normal,refl_mix,refr_mix);
+			fresnel(shape->material()->n,normal,ray.direction,refl_mix);
+			Color refraction{0.0f,0.0f,0.0f};
+			if(refl_mix<1)
+			{
+				refraction = calculate_refraction(shape, cut, normal, scene, ray, step);	
+			}
 			final_value = reflection*refl_mix+refraction*(1-refl_mix);			
 		}
-		else {*/
+		else {
 			Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
 			final_value = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
-		//}
+		}
 	}
 	else {
 	final_value = ambient + diffuse + specular;}
@@ -149,15 +153,60 @@ Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 con
 	}
 }
 
-//calculates refraction
+//calculates refraction 
 Color Renderer::calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step)
 {
+	float ior{shape->material()->n}; //refraction index
+	
+	//calculates refraction-vector from outside-inside
+	glm::vec3 refraction_vec = glm::normalize(glm::refract(glm::normalize(ray.direction),glm::normalize(normal),ior));
+	glm::vec3 refraction_origin = cut-1.0f*normal;
+	Ray new_ray{refraction_origin,refraction_vec};
 
+	glm::vec3 new_cut, new_normal;
+	float distance;
+	std::shared_ptr<Shape> cut_shape = nullptr;
+
+	//trace the ray and refract again inside - outside
+	bool hit = scene.root_composite_->intersect(new_ray, distance ,new_cut, new_normal, cut_shape);
+	refraction_vec = glm::normalize(glm::refract(glm::normalize(new_ray.direction),glm::normalize(new_normal),1.0f));
+	new_ray = {new_cut-1.0f*new_normal,refraction_vec};
+
+	//continue rekursivly
+	hit = scene.root_composite_->intersect(new_ray,distance,new_cut,new_normal,cut_shape);
+	if (!hit) {return Color{ 0.2314f, 0.5137f, 0.7412f };}
+	else if(step > 0){
+		Color refraction_color = calculate_color(cut_shape, new_cut, new_normal, scene, new_ray, step - 1);
+		return refraction_color;	
+	}
+	else
+	{
+		return Color{ 0,0,0 };
+	}
 }
 
-void Renderer::fresnel(float refraction_index,glm::vec3 const& normal_Hit,float& refl_mix,float& refr_mix)
+void Renderer::fresnel(float refraction_index,glm::vec3 const& normal_Hit,glm::vec3 const& incoming_ray ,float& refr_mix)
 {
-
+	float cosi = glm::clamp(-1.0f, 1.0f,glm::dot(incoming_ray,normal_Hit)); 
+	float etai{1.0f};
+	float etat{refraction_index};
+	if(cosi>1)
+	{
+		std::swap(etai,etat);
+	}
+	float sint = etai/etat * sqrtf(std::max(0.f,1-cosi*cosi));
+	if(sint>=1)
+	{
+		refr_mix = 1;
+	}
+	else
+	{
+		float cost = sqrtf(std::max(0.f, 1 - sint * sint));
+		cosi = fabsf(cosi);
+		float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+		float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+		refr_mix = (Rs * Rs + Rp * Rp) / 2; 
+	}
 }
 
 //do you really have to multiply two colors?

@@ -46,7 +46,7 @@ private:
   PpmWriter ppm_;
 
   //calculates the mix_values of Refraction + Reflection 
-  void fresnel(float refraction_index,glm::vec3 const& normal_Hit,float& refl_mix,float& refr_mix);
+  void fresnel(float refraction_index,glm::vec3 const& normal_Hit,glm::vec3 const& incoming_vector,float& refr_mix);
 };
 
 Ray transformRay(glm::mat4 const& mat, Ray const& ray);
