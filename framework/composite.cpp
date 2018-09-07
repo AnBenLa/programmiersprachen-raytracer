@@ -2,28 +2,16 @@
 #include <algorithm>
 #include "renderer.hpp"
 
-#define TRANSLATE_MATRIX glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{translate.x,translate.y,translate.z,1.0f}}
-#define SCALE_MATRIX glm::mat4x4{glm::vec4{scale.x,0.0f,0.0f,0.0f},glm::vec4{0.0f,scale.y,0.0f,0.0f},glm::vec4{0.0f,0.0f,scale.z,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
-#define XROT_MATRIX  glm::mat4x4{glm::vec4{1,0.0f,0.0f,0.0f},glm::vec4{0.0f,glm::cos(rotation),glm::sin(rotation),0.0f},glm::vec4{0.0f,-glm::sin(rotation),glm::cos(rotation),0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
-#define YROT_MATRIX	 glm::mat4x4{glm::vec4{glm::cos(rotation),0.0f,-glm::sin(rotation),0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{glm::sin(rotation),0.0f,glm::cos(rotation),0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
-#define ZROT_MATRIX  glm::mat4x4{glm::vec4{glm::cos(rotation),glm::sin(rotation),0.0f,0.0f},glm::vec4{-glm::sin(rotation),glm::cos(rotation),0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}}
+Composite::Composite() : Shape{"no name", nullptr} {};
 
-Composite::Composite() : Shape{"no name", nullptr} {
-    world_transformation_= glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}};
-    world_transformation_inv_ = glm::inverse(world_transformation_);};
-
-Composite::Composite(std::string const& name) : Shape{ name, nullptr } {
-    world_transformation_= glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}};
-    world_transformation_inv_ = glm::inverse(world_transformation_);};
+Composite::Composite(std::string const& name) : Shape{ name, nullptr } {};
 
 Composite::Composite(std::string const& name,std::vector<std::shared_ptr<Shape>>const& shapes,std::vector<std::shared_ptr<Composite>>const& composites):
     Shape{name, nullptr},
     shapes_{shapes},
     composites_{composites}
 {
-    createBoundingBox();
-    world_transformation_= glm::mat4x4{glm::vec4{1.0f,0.0f,0.0f,0.0f},glm::vec4{0.0f,1.0f,0.0f,0.0f},glm::vec4{0.0f,0.0f,1.0f,0.0f},glm::vec4{0.0f,0.0f,0.0f,1.0f}};
-    world_transformation_inv_ = glm::inverse(world_transformation_);
+    //createBoundingBox();
 };
 
 Composite::~Composite(){};
@@ -103,26 +91,6 @@ bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cu
 	}
 }
 
-void Composite::apply_transformation(glm::vec3 const& translate,float rotation, Axis axis,glm::vec3 const& scale)
-{
-    //create TRS matrix
-    //determines rotationaxis
-    switch(axis)
-    {
-        case x_axis:
-		world_transformation_= world_transformation_ * TRANSLATE_MATRIX*XROT_MATRIX*SCALE_MATRIX;
-		break;
-
-        case y_axis:
-        world_transformation_= world_transformation_ * TRANSLATE_MATRIX*YROT_MATRIX*SCALE_MATRIX;
-		break;
-
-        case z_axis:
-        world_transformation_= world_transformation_ * TRANSLATE_MATRIX*ZROT_MATRIX*SCALE_MATRIX;
-    }
-    world_transformation_inv_ = glm::inverse(world_transformation_);
-}
-
 std::vector<std::shared_ptr<Shape>>& Composite::getShapes(std::vector<std::shared_ptr<Shape>>& shapes)
 {
     for(auto child : composites_)
@@ -170,6 +138,7 @@ void Composite::createBoundingBox()
 
     for(std::shared_ptr<Composite> child : composites_)
     {
+		child->createBoundingBox();
         boundingBoxes.push_back(child->boundingBox());
     }
 
