@@ -33,6 +33,24 @@ void Renderer::render(Scene const& scene, int frames)
 	for (int i = 0; i < frames;++i) {
 		//scene.camera_->position_ = glm::vec3{ 0, 0 , 200 - i };
 		//scene.light_vec_.at(0)->position_ = glm::vec3{ 500,800,i*6 };
+
+		glm::vec3 distance{ 0.0f , 0.0f, 300.0f };
+		glm::mat4x4 rotation = glm::rotate((float)i, glm::vec3{ 0.0f, 1.0f, 0.0f });
+		glm::vec4 n_4 = glm::vec4{ scene.camera_->direction_, 0 } *rotation;
+		glm::vec4 up_4 = glm::vec4{ scene.camera_->up_, 0 } *rotation;
+		glm::vec3 n = glm::normalize(glm::vec3{ n_4.x, n_4.y , n_4.z });
+		glm::vec3 up = glm::vec3{ up_4.x, up_4.y , up_4.z };
+		glm::vec3 u = glm::normalize(glm::cross(n, up));
+		glm::vec3 v = glm::normalize(glm::cross(u, n));
+		float x = (glm::vec4{ distance, 1.0f } *rotation).x;
+		float z = (glm::vec4{ distance, 1.0f } *rotation).z;
+		scene.camera_->transformation_ = glm::mat4{
+			glm::vec4{u,0.0f},
+			glm::vec4{v,0.0f},
+			glm::vec4{-n,0.0f},
+			glm::vec4{x, 20.0f, z, 1.0f}
+		};
+	
 		auto start = std::chrono::high_resolution_clock::now();
 		int progress = 0;
 		
@@ -106,32 +124,28 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	Color diffuse = calculate_diffuse(shape, cut, normal, scene);
 	Color specular = calculate_specular(shape, cut, normal, scene);
 
-	if (shape->material()->glossy > 0) {
-		if(shape->material()->n>0)
-		{
-			Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
-			float refl_mix;
-			float refr_mix;
-			fresnel(shape->material()->n,normal,ray.direction,refl_mix);
-			Color refraction{0.0f,0.0f,0.0f};
-			if(refl_mix<1)
-			{
-				refraction = calculate_refraction(shape, cut, normal, scene, ray, step);	
-			}
-			final_value = reflection*refl_mix+refraction*(1-refl_mix);			
-		}
-		else {
-			Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
-			final_value = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
-		}
-	}
-	else {
-	final_value = ambient + diffuse + specular;}
+	if (shape->material()->o > 0 && shape->material()->glossy > 0)
+	{
+		Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
+		Color phong = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
+		Color refraction = calculate_refraction(shape, cut, normal, scene, ray);
 
+		final_value = phong * (1 - shape->material()->o) + refraction * shape->material()->o;
+	}else if (shape->material()->glossy > 0) {
+		Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
+	
+		final_value = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
+	}
+	else if (shape->material()->o > 0) {
+		Color refraction = calculate_refraction(shape, cut, normal, scene, ray);
+		Color phong = ambient + diffuse + specular;
+		final_value = phong * (1 - shape->material()->o) + refraction * shape->material()->o;
+	} else {
+		final_value = ambient + diffuse + specular;
+	}
 	return  final_value;
 }
 
-//needs to be fixed
 Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step){
 	glm::vec3 reflection_vec = glm::reflect(glm::normalize(ray.direction), glm::normalize(normal));
 	Ray new_ray{ cut + 0.1f*normal, glm::normalize(reflection_vec) };
@@ -154,13 +168,13 @@ Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 con
 }
 
 //calculates refraction 
-Color Renderer::calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray, int step)
+Color Renderer::calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray)
 {
 	float ior{shape->material()->n}; //refraction index
 	
 	//calculates refraction-vector from outside-inside
 	glm::vec3 refraction_vec = glm::normalize(glm::refract(glm::normalize(ray.direction),glm::normalize(normal),ior));
-	glm::vec3 refraction_origin = cut-1.0f*normal;
+	glm::vec3 refraction_origin = cut-0.1f*normal;
 	Ray new_ray{refraction_origin,refraction_vec};
 
 	glm::vec3 new_cut, new_normal;
@@ -169,19 +183,14 @@ Color Renderer::calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 con
 
 	//trace the ray and refract again inside - outside
 	bool hit = scene.root_composite_->intersect(new_ray, distance ,new_cut, new_normal, cut_shape);
-	refraction_vec = glm::normalize(glm::refract(glm::normalize(new_ray.direction),glm::normalize(new_normal),1.0f));
-	new_ray = {new_cut-1.0f*new_normal,refraction_vec};
-
-	//continue rekursivly
-	hit = scene.root_composite_->intersect(new_ray,distance,new_cut,new_normal,cut_shape);
-	if (!hit) {return Color{ 0.2314f, 0.5137f, 0.7412f };}
-	else if(step > 0){
-		Color refraction_color = calculate_color(cut_shape, new_cut, new_normal, scene, new_ray, step - 1);
-		return refraction_color;	
+	if (hit && cut_shape != shape) {
+		return calculate_color(cut_shape, new_cut, new_normal, scene, new_ray, 3);
 	}
-	else
-	{
-		return Color{ 0,0,0 };
+	else if (hit) {
+		//new_cut += new_normal*0.5f;
+		return calculate_refraction(cut_shape, new_cut, -new_normal, scene, new_ray);
+	} else {
+		return Color{ 0.2314f, 0.5137f, 0.7412f };
 	}
 }
 
@@ -209,12 +218,9 @@ void Renderer::fresnel(float refraction_index,glm::vec3 const& normal_Hit,glm::v
 	}
 }
 
-//do you really have to multiply two colors?
 Color Renderer::calculate_ambiente(std::shared_ptr<Shape> shape, Scene const& scene) {
 	return scene.ambiente_->color_ * shape->material()->ka;
 }
-
-//seems to be working!!!
 
 Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
 	Color comb_clr{ 0,0,0 };
@@ -247,8 +253,6 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 	}
 	return comb_clr;
 }
-
-//seems to be working!!!
 
 Color Renderer::calculate_specular(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene) {
 	Color comb_clr{ 0,0,0 };

@@ -111,7 +111,7 @@ bool Cylinder::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, 
 			glm::vec4 transformed_normal = glm::normalize(glm::transpose(world_transformation_inv_) * glm::vec4{ normal , 0 });
 
 			cut_point = glm::vec3{ transformed_cut.x, transformed_cut.y, transformed_cut.z };
-			normal = glm::vec3{ transformed_normal.x, transformed_normal.y, transformed_normal.z };
+			normal = glm::normalize(glm::vec3{ transformed_normal.x, transformed_normal.y, transformed_normal.z });
 			distance = glm::length(cut_point - ray.origin);
 			return true;
 		}

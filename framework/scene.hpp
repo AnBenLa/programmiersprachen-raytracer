@@ -222,9 +222,10 @@ static void deserializeObjects(Scene& scene, std::string line, std::map<std::str
 					}
 					else {
 						float glossy = std::stof(lineParts[13], NULL);
-						if(lineParts.size() == 15){
+						if(lineParts.size() == 16){
 							float n = std::stof(lineParts[14], NULL);
-							mat = std::make_shared<Material>(lineParts[2],ka,kd,ks,m,glossy,n);
+							float o = std::stof(lineParts[15], NULL);
+							mat = std::make_shared<Material>(lineParts[2],ka,kd,ks,m,glossy,n, o);
 						}
 						else {
 							mat = std::make_shared<Material>(lineParts[2], ka, kd, ks, m, glossy);
