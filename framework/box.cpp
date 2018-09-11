@@ -29,9 +29,9 @@ bool Box::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm::
 	Ray transformedRay = transformRay(world_transformation_inv_,ray);
 
 	//Creating the planes that our box consists of
-	Plane plane1{ min_, glm::vec3 { 1,0,0 } };
-	Plane plane2{ min_, glm::vec3 { 0,0,1 } };
-	Plane plane3{ min_, glm::vec3 { 0,1,0 } };
+	Plane plane1{ min_, glm::vec3 { -1,0,0 } };
+	Plane plane2{ min_, glm::vec3 { 0,0,-1 } };
+	Plane plane3{ min_, glm::vec3 { 0,-1,0 } };
 	Plane plane4{ max_, glm::vec3 { 1,0,0 } };
 	Plane plane5{ max_, glm::vec3 { 0,0,1 } };
 	Plane plane6{ max_, glm::vec3 { 0,1,0 } };

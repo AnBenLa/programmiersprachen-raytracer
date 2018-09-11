@@ -116,7 +116,6 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 				if (lineParts[0] == "o") {
 					std::string name = lineParts[1];
 					if (current_comp != nullptr) {
-						current_comp->createBoundingBox();
 						if (obj_comp == nullptr) {
 							obj_comp = std::make_shared<Composite>();
 						}
@@ -185,11 +184,9 @@ static void readOBJ_File(std::string const& path, Scene& scene, std::shared_ptr<
 			}
 		}
 		if (current_comp != nullptr) {
-			current_comp->createBoundingBox();
 			obj_comp->add(current_comp);
 			std::cout << "Comp: " << current_name << " was added\n";
 		}
-		obj_comp->createBoundingBox();
 		std::cout << "\n" << vertices.size() << " vertices loaded\n";
 		std::cout << shapes << " faces loaded\n";
 		std::cout << "\nOBJ loaded\n-----------------------------------------------------------------------------------------\n" << std::endl;

@@ -34,7 +34,9 @@ void Renderer::render(Scene const& scene, int frames)
 		//scene.camera_->position_ = glm::vec3{ 0, 0 , 200 - i };
 		//scene.light_vec_.at(0)->position_ = glm::vec3{ 500,800,i*6 };
 
-		glm::vec3 distance{ 0.0f , 0.0f, 300.0f };
+		//creates a rotating motion for the camera around the origin
+	
+		glm::vec3 distance{ 0.0f , 0.0f, 450.0f };
 		glm::mat4x4 rotation = glm::rotate((float)i, glm::vec3{ 0.0f, 1.0f, 0.0f });
 		glm::vec4 n_4 = glm::vec4{ scene.camera_->direction_, 0 } *rotation;
 		glm::vec4 up_4 = glm::vec4{ scene.camera_->up_, 0 } *rotation;
@@ -48,9 +50,10 @@ void Renderer::render(Scene const& scene, int frames)
 			glm::vec4{u,0.0f},
 			glm::vec4{v,0.0f},
 			glm::vec4{-n,0.0f},
-			glm::vec4{x, 20.0f, z, 1.0f}
+			glm::vec4{x, 50.0f, z, 1.0f}
 		};
 	
+
 		auto start = std::chrono::high_resolution_clock::now();
 		int progress = 0;
 		
@@ -70,27 +73,48 @@ void Renderer::render(Scene const& scene, int frames)
 			}
 			for (unsigned x = 0; x < width_; ++x) {
 				Pixel p(x, y);
-				p.color = Color{ 0.2314f, 0.5137f, 0.7412f };
+				//p.color = Color{ 0.2314f, 0.5137f, 0.7412f };
 
 				//generate the camera ray
 				glm::vec3 pos = scene.camera_->position_;
 				glm::vec3 dir = glm::normalize(scene.camera_->direction_);
-				dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
-				Ray ray{ pos , glm::normalize(dir) };
-				ray = transformRay(scene.camera_->transformation_, ray);
+				
+				std::vector<glm::vec3> dirs;
+				bool basic_anti_aliasing = false;
 
-				//calculate the first shape that gets hit
-				glm::vec3 cut, normal;
-				float distance;
-				std::shared_ptr<Shape> cut_shape = nullptr;
-				bool hit = scene.root_composite_->intersect(ray, distance, cut, normal, cut_shape);
+				if (basic_anti_aliasing) {
+					glm::vec3 dir_1 = dir + glm::vec3{ x - (0.5 * width_) + 0.5f,y - (0.5 * height_) + 0.5f,-d };
+					glm::vec3 dir_2 = dir + glm::vec3{ x - (0.5 * width_) + 0.5f,y - (0.5 * height_) - 0.5f,-d };
+					glm::vec3 dir_3 = dir + glm::vec3{ x - (0.5 * width_) - 0.5f,y - (0.5 * height_) + 0.5f,-d };
+					glm::vec3 dir_4 = dir + glm::vec3{ x - (0.5 * width_) - 0.5f,y - (0.5 * height_) - 0.5f,-d };
 
-				//if a shape is hit the pixel color is computed
-				if (cut_shape != nullptr && hit) {
-					//Color current_color = calculate_depth_map(cut, scene, 150);
-					Color current_color = calculate_color(cut_shape, cut, normal, scene, ray, 3);
-					//tone_mapping(current_color);
-					p.color = current_color;
+					dirs = std::vector<glm::vec3>{ dir_1, dir_2, dir_3, dir_4 };
+				} else {
+					dir = dir + glm::vec3{ x - (0.5 * width_),y - (0.5 * height_),-d };
+					dirs = std::vector<glm::vec3>{ dir };
+				}
+
+				for (int i = 0; i < dirs.size(); ++i) {
+
+					dir = dirs.at(i);
+					Ray ray{ pos , glm::normalize(dir) };
+					ray = transformRay(scene.camera_->transformation_, ray);
+
+					//calculate the first shape that gets hit
+					glm::vec3 cut, normal;
+					float distance;
+					std::shared_ptr<Shape> cut_shape = nullptr;
+					bool hit = scene.root_composite_->intersect(ray, distance, cut, normal, cut_shape);
+
+					//if a shape is hit the pixel color is computed
+					if (cut_shape != nullptr && hit) {
+						//Color current_color = calculate_depth_map(cut, scene, 150);
+						Color current_color = calculate_color(cut_shape, cut, normal, scene, ray, 3);
+						//tone_mapping(current_color);
+						p.color += current_color * (1.0f/dirs.size());
+					} if (!hit) {
+						p.color += Color{ 0.2314f, 0.5137f, 0.7412f }*(1.0f / dirs.size());
+					}
 				}
 				write(p);
 			}
@@ -128,7 +152,7 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 	{
 		Color reflection = calculate_reflection(shape, cut, normal, scene, ray, step);
 		Color phong = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
-		Color refraction = calculate_refraction(shape, cut, normal, scene, ray);
+		Color refraction = calculate_refraction(nullptr,shape, cut, normal, scene, ray);
 
 		final_value = phong * (1 - shape->material()->o) + refraction * shape->material()->o;
 	}else if (shape->material()->glossy > 0) {
@@ -137,7 +161,7 @@ Color Renderer::calculate_color(std::shared_ptr<Shape> shape, glm::vec3 const& c
 		final_value = (ambient + diffuse) * (1 - shape->material()->glossy) + reflection * shape->material()->glossy + specular;
 	}
 	else if (shape->material()->o > 0) {
-		Color refraction = calculate_refraction(shape, cut, normal, scene, ray);
+		Color refraction = calculate_refraction(nullptr, shape, cut, normal, scene, ray);
 		Color phong = ambient + diffuse + specular;
 		final_value = phong * (1 - shape->material()->o) + refraction * shape->material()->o;
 	} else {
@@ -168,12 +192,20 @@ Color Renderer::calculate_reflection(std::shared_ptr<Shape> shape, glm::vec3 con
 }
 
 //calculates refraction 
-Color Renderer::calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray)
+Color Renderer::calculate_refraction(std::shared_ptr<Shape> prev_shape, std::shared_ptr<Shape> shape, glm::vec3 const& cut, glm::vec3 const& normal, Scene const& scene, Ray const& ray)
 {
+	float eta = 1.0f;
 	float ior{shape->material()->n}; //refraction index
-	
+
+	if (prev_shape == nullptr) {
+		eta = 1.0f / ior;
+	} else if (prev_shape == shape) {
+		eta = ior;
+	} 
+
+	//ior = 2.0f - ior;
 	//calculates refraction-vector from outside-inside
-	glm::vec3 refraction_vec = glm::normalize(glm::refract(glm::normalize(ray.direction),glm::normalize(normal),ior));
+	glm::vec3 refraction_vec = glm::normalize(glm::refract(glm::normalize(ray.direction),glm::normalize(normal),eta));
 	glm::vec3 refraction_origin = cut-0.1f*normal;
 	Ray new_ray{refraction_origin,refraction_vec};
 
@@ -187,8 +219,7 @@ Color Renderer::calculate_refraction(std::shared_ptr<Shape> shape, glm::vec3 con
 		return calculate_color(cut_shape, new_cut, new_normal, scene, new_ray, 3);
 	}
 	else if (hit) {
-		//new_cut += new_normal*0.5f;
-		return calculate_refraction(cut_shape, new_cut, -new_normal, scene, new_ray);
+		return calculate_refraction(shape, cut_shape, new_cut, -new_normal, scene, new_ray);
 	} else {
 		return Color{ 0.2314f, 0.5137f, 0.7412f };
 	}
@@ -234,7 +265,7 @@ Color Renderer::calculate_diffuse(std::shared_ptr<Shape> shape, glm::vec3 const&
 		std::shared_ptr<Shape> cut_shape = nullptr;
 
 		//the cut can be inside the shape so a point outside the shape is calculated by cut + 0.1f*normal
-		bool cuts_shape = scene.root_composite_->intersect(Ray{ cut + 0.1f*normal,vec_to_light }, distance ,cut_point, normal_new, cut_shape);
+		bool cuts_shape = scene.root_composite_->intersect(Ray{ cut + 0.2f*normal,vec_to_light }, distance ,cut_point, normal_new, cut_shape);
 		if (cuts_shape && cut_shape != nullptr) {
 			can_see_light = false;
 		}

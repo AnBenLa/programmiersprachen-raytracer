@@ -11,7 +11,6 @@ Composite::Composite(std::string const& name,std::vector<std::shared_ptr<Shape>>
     shapes_{shapes},
     composites_{composites}
 {
-    //createBoundingBox();
 };
 
 Composite::~Composite(){};
@@ -20,13 +19,11 @@ Composite::~Composite(){};
 void Composite::add(std::shared_ptr<Shape> const& child)
 {
     shapes_.push_back(child);
-    updateBoundingBox(child);
 }
 
 void Composite::add(std::shared_ptr<Composite> const& child)
 {
     composites_.push_back(child);
-    updateBoundingBox(child);
 }
 
 bool Composite::intersect(Ray const& incoming_ray, float& distance,glm::vec3& cut_point, glm::vec3& normal_vec, std::shared_ptr<Shape>& shape)const

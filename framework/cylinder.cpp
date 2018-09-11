@@ -86,7 +86,7 @@ bool Cylinder::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, 
 			normal = glm::normalize(glm::vec3{ cut_point.x, cut_point.y, 0.0f });
 			cut = true;
 		}
-		Plane plane_1{ glm::vec3{ 0,0,-1 }, glm::vec3{ 0,0,1 } };
+		Plane plane_1{ glm::vec3{ 0,0,-1 }, glm::vec3{ 0,0,-1 } };
 		Plane plane_2{ glm::vec3{ 0,0,0 },	glm::vec3{ 0,0,1 } };
 		float distance_base_1 = (glm::dot(plane_1.normal, plane_1.origin) - glm::dot(transformedRay.origin, plane_1.normal)) / (glm::dot(transformedRay.direction, plane_1.normal));
 		float distance_base_2 = (glm::dot(plane_2.normal, plane_2.origin) - glm::dot(transformedRay.origin, plane_2.normal)) / (glm::dot(transformedRay.direction, plane_2.normal));

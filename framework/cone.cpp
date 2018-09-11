@@ -86,7 +86,7 @@ bool Cone::intersect(Ray const& ray, float& distance ,glm::vec3& cut_point, glm:
 			normal = glm::normalize(glm::vec3{ proj_z.x, proj_z.y , 1.0f });
 			cut = true;
 		}
-		Plane plane{ glm::vec3{ 0,0,-1 }, glm::vec3{ 0,0,1 } };
+		Plane plane{ glm::vec3{ 0,0,-1 }, glm::vec3{ 0,0,-1 } };
 		float distance_base = (glm::dot(plane.normal, plane.origin) - glm::dot(transformedRay.origin, plane.normal)) / (glm::dot(transformedRay.direction, plane.normal));
 		glm::vec3  base_cut = transformedRay.origin + distance_base * transformedRay.direction;
 		if (distance_base > 0) {
