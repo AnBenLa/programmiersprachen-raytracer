@@ -206,7 +206,7 @@ Color Renderer::calculate_refraction(std::shared_ptr<Shape> prev_shape, std::sha
 	//ior = 2.0f - ior;
 	//calculates refraction-vector from outside-inside
 	glm::vec3 refraction_vec = glm::normalize(glm::refract(glm::normalize(ray.direction),glm::normalize(normal),eta));
-	glm::vec3 refraction_origin = cut-0.1f*normal;
+	glm::vec3 refraction_origin = cut-0.2f*normal;
 	Ray new_ray{refraction_origin,refraction_vec};
 
 	glm::vec3 new_cut, new_normal;

@@ -1,57 +1,90 @@
-# materials
-define material red     1 0 0 1 0 0 1 0 0 810 	0.5
-define material blue    0 0 1 0 0 1 1 1 1 810 	0.1 1.5
-define material green   0 1 0 0 1 0 0 1 0 810 	0.5
-define material purple  1 0 1 1 0 1 1 0 1 810   0.5
-define material black   0.2 0.2 0.2 0 0 0 0.2 0.2 0.2 10 0.1
-define material white   0.2 0.2 0.2 1 1 1 0.2 0.2 0.2 10 0.1
-# define mtl C:\\test-2.mtl
-# define obj C:\\test-2.obj
+# materials     name    	ka              kd          ks              m       refl	refr	opa 
+define material red     	1 0 0 			1 0 0 		1 1 1 			200 	0.0 	1.4 	0.0
+define material blue    	0 0 1 			0 0 1 		1 1 1 			200 	0.0 	1.4 	0.0
+define material green   	0 1 0 			0 1 0 		1 1 1 			200 	0.0 	1.4  	0.0
+define material purple  	1 0 1 			1 0 1 		1 1 1 			200   	0.0		0.0		0.0
+define material orange  	1 0.5 0.2 		1 0.5 0.2 	1 1 1 			200 	0.0 	1.4		0.0
+define material red-r     	1 0 0 			1 0 0 		1 1 1 			200 	0.9 	1.4 	0.0
+define material blue-r    	0 0 1 			0 0 1 		1 1 1 			200 	0.9 	1.4 	0.0
+define material green-r   	0 1 0 			0 1 0 		1 1 1 			200 	0.9 	1.4  	0.0
+define material purple-r  	1 0 1 			1 0 1 		1 1 1 			200   	0.9		1.4		0.0
+define material orange-r  	1 0.5 0.2 		1 0.5 0.2 	1 1 1 			200 	0.9 	1.4		0.0
+define material red-re     	1 0 0 			1 0 0 		1 1 1 			200 	0.0 	1.0 	0.7
+define material blue-re   	0 0 1 			0 0 1 		1 1 1 			200 	0.0 	1.4 	0.9
+define material green-re   	0 1 0 			0 1 0 		1 1 1 			200 	0.0 	1.4  	0.9
+define material purple-re  	1 0 1 			1 0 1 		1 1 1 			200   	0.0		1.4		0.9
+define material orange-re  	1 0.5 0.2 		1 0.5 0.2 	1 1 1 			200 	0.0 	1.4		0.9
+define material black   	0.2 0.2 0.2 	0 0 0 		0.2 0.2 0.2 	10 		0.2
+define material white   	0.2 0.2 0.2 	1 1 1 		0.2 0.2 0.2 	10 		0.2
+# define mtl C:\\final.mtl
+# define obj C:\\final.obj
 # geometry
-define shape box chess_row_1_1  	-300	-100 	100 	-200   	0 	200 	black
-define shape box chess_row_1_2   	-200	-100 	100 	-100 	0 	200 	white
-define shape box chess_row_1_3  	-100	-100 	100 	0   	0 	200 	black
-define shape box chess_row_1_4   	0  	-100 	100 	100 	0 	200 	white
-define shape box chess_row_1_5  	100	-100 	100 	200   	0 	200 	black
-define shape box chess_row_2_6   	200  	-100 	100 	300 	0 	200 	white
-define shape box chess_row_2_1  	-300	-100 	0 	-200   	0 	100 	white
-define shape box chess_row_2_2   	-200	-100 	0 	-100 	0 	100 	black
-define shape box chess_row_2_3  	-100	-100 	0 	0   	0 	100 	white
-define shape box chess_row_2_4   	0  	-100 	0 	100 	0 	100 	black
-define shape box chess_row_2_5  	100	-100 	0 	200   	0 	100 	white
-define shape box chess_row_2_6   	200  	-100 	0 	300 	0 	100 	black
-define shape box chess_row_3_1  	-300	-100 	-100 	-200   	0 	0 	black
-define shape box chess_row_3_2   	-200	-100 	-100 	-100 	0 	0 	white
-define shape box chess_row_3_3  	-100	-100 	-100 	0   	0 	0 	black
-define shape box chess_row_3_4   	0  	-100 	-100 	100 	0 	0 	white
-define shape box chess_row_3_5  	100	-100 	-100 	200   	0 	0 	black
-define shape box chess_row_3_6   	200  	-100 	-100 	300 	0 	0 	white
-define shape box chess_row_4_1  	-300	-100 	-200 	-200   	0 	-100 	white
-define shape box chess_row_4_2   	-200	-100 	-200 	-100 	0 	-100 	black
-define shape box chess_row_4_3  	-100	-100 	-200 	0   	0 	-100 	white
-define shape box chess_row_4_4   	0  	-100 	-200 	100 	0 	-100 	black
-define shape box chess_row_4_5  	100	-100 	-200 	200   	0 	-100 	white
-define shape box chess_row_4_6   	200  	-100 	-200 	300 	0 	-100 	black
-define shape box chess_row_5_1   	-300  	-100 	-300 	-200   	0 	-200 	black
-define shape box chess_row_5_2   	-200 	-100 	-300 	-100 	0 	-200 	white
-define shape box chess_row_5_3  	-100  	-100 	-300 	0   	0 	-200 	black
-define shape box chess_row_5_4   	0  	-100 	-300 	100 	0 	-200 	white
-define shape box chess_row_5_5   	100  	-100 	-300 	200 	0 	-200 	black
-define shape box chess_row_5_6  	200  	-100 	-300 	300   	0 	-200 	white
-define shape box chess_row_6_1   	-300  	-100 	-400 	-200   	0 	-300 	white
-define shape box chess_row_6_2   	-200 	-100 	-400 	-100 	0 	-300 	black
-define shape box chess_row_6_3  	-100  	-100 	-400 	0   	0 	-300 	white
-define shape box chess_row_6_4   	0  	-100 	-400 	100 	0 	-300 	black
-define shape box chess_row_6_5   	100  	-100 	-400 	200 	0 	-300 	white
-define shape box chess_row_6_6  	200  	-100 	-400 	300   	0 	-300 	black
+define shape box chess_row_1_1  	-300	-100 	300 	-200   	0 	400 	black
+define shape box chess_row_1_2   	-200	-100 	300 	-100 	0 	400 	white
+define shape box chess_row_1_3  	-100	-100 	300 	0   	0 	400 	black
+define shape box chess_row_1_4   	0  		-100 	300 	100 	0 	400 	white
+define shape box chess_row_1_5  	100		-100 	300 	200   	0 	400 	black
+define shape box chess_row_1_6   	200  	-100 	300 	300 	0 	400 	white
+define shape box chess_row_2_1  	-300	-100 	200 	-200   	0 	300 	white
+define shape box chess_row_2_2   	-200	-100 	200 	-100 	0 	300 	black
+define shape box chess_row_2_3  	-100	-100 	200 	0   	0 	300 	white
+define shape box chess_row_2_4   	0  		-100 	200 	100 	0 	300 	black
+define shape box chess_row_2_5  	100		-100 	200 	200   	0 	300 	white
+define shape box chess_row_2_6   	200  	-100 	200 	300 	0 	300 	black
+define shape box chess_row_3_1  	-300	-100 	100 	-200   	0 	200 	black
+define shape box chess_row_3_2   	-200	-100 	100 	-100 	0 	200 	white
+define shape box chess_row_3_3  	-100	-100 	100 	0   	0 	200 	black
+define shape box chess_row_3_4   	0  		-100 	100 	100 	0 	200 	white
+define shape box chess_row_3_5  	100		-100 	100 	200   	0 	200 	black
+define shape box chess_row_3_6   	200  	-100 	100 	300 	0 	200 	white
+define shape box chess_row_4_1  	-300	-100 	0 		-200   	0 	100 	white
+define shape box chess_row_4_2   	-200	-100 	0 		-100 	0 	100 	black
+define shape box chess_row_4_3  	-100	-100 	0 		0   	0 	100 	white
+define shape box chess_row_4_4   	0  		-100 	0 		100 	0 	100 	black
+define shape box chess_row_4_5  	100		-100 	0 		200   	0 	100 	white
+define shape box chess_row_4_6   	200  	-100 	0 		300 	0 	100 	black
+define shape box chess_row_5_1  	-300	-100 	-100 	-200   	0 	0 		black
+define shape box chess_row_5_2   	-200	-100 	-100 	-100 	0 	0 		white
+define shape box chess_row_5_3  	-100	-100 	-100 	0   	0 	0 		black
+define shape box chess_row_5_4   	0  		-100 	-100 	100 	0 	0 		white
+define shape box chess_row_5_5  	100		-100 	-100 	200   	0 	0 		black
+define shape box chess_row_5_6   	200  	-100 	-100 	300 	0 	0 		white
+define shape box chess_row_6_1  	-300	-100 	-200 	-200   	0 	-100 	white
+define shape box chess_row_6_2   	-200	-100 	-200 	-100 	0 	-100 	black
+define shape box chess_row_6_3  	-100	-100 	-200 	0   	0 	-100 	white
+define shape box chess_row_6_4   	0  		-100 	-200 	100 	0 	-100 	black
+define shape box chess_row_6_5  	100		-100 	-200 	200   	0 	-100 	white
+define shape box chess_row_6_6   	200  	-100 	-200 	300 	0 	-100 	black
+define shape box chess_row_7_1   	-300  	-100 	-300 	-200   	0 	-200 	black
+define shape box chess_row_7_2   	-200 	-100 	-300 	-100 	0 	-200 	white
+define shape box chess_row_7_3  	-100  	-100 	-300 	0   	0 	-200 	black
+define shape box chess_row_7_4   	0  		-100 	-300 	100 	0 	-200 	white
+define shape box chess_row_7_5   	100  	-100 	-300 	200 	0 	-200 	black
+define shape box chess_row_7_6  	200  	-100 	-300 	300   	0 	-200 	white
+define shape box chess_row_8_1   	-300  	-100 	-400 	-200   	0 	-300 	white
+define shape box chess_row_8_2   	-200 	-100 	-400 	-100 	0 	-300 	black
+define shape box chess_row_8_3  	-100  	-100 	-400 	0   	0 	-300 	white
+define shape box chess_row_8_4   	0  		-100 	-400 	100 	0 	-300 	black
+define shape box chess_row_8_5   	100  	-100 	-400 	200 	0 	-300 	white
+define shape box chess_row_8_6  	200  	-100 	-400 	300   	0 	-300 	black
 
+define shape cone rcone-re			0		0		-200		50		25		red-re
+define shape triangle ptriangle-re  25  	0 		-200 		75   	0 		-200 		50		50		-200		purple-re
+define shape cylinder bcylinder-re	-50     0    	-200		50      25		blue-re 
+define shape sphere gsphere-re 		100 	25 		-200 		25 		green-re
+define shape box obox-re  			-135 	0 		-225 	-85 	50		-175 	orange-re
 
-define shape cone rcone			0	0	0	50	25	red
-define shape triangle ptriangle  	25  	0 	0 	75   	0 	0 	50	50	0	purple
-define shape cylinder bcylinder		-50     0    	0	50      25	blue 
-define shape sphere gsphere 		100 	25 	0 	25 	green
-define shape box test    		-100 	-80 	-100 	100 	0	100 	green
+define shape cone rcone				0		0		0		50		25		red
+define shape triangle ptriangle  	25  	0 		0 		75   	0 		0 		50		50		0		purple
+define shape cylinder bcylinder		-50     0    	0		50      25		blue 
+define shape sphere gsphere 		100 	25 		0 		25 		green
+define shape box obox  			  	-135 	0 		-25 	-85 	50		25 	orange
 
+define shape cone rcone-r			0		0		200		50		25		red-r
+define shape triangle ptriangle-r  	25  	0 		200 	75   	0 		200 		50		50		200		purple-r
+define shape cylinder bcylinder-r	-50     0    	200		50      25		blue-r 
+define shape sphere gsphere-r 		100 	25 		200 	25 		green-r
+define shape box obox-r  		  	-135 	0 		175 	-85 	50		225 	orange-r
 
 # composite
 define shape composite row_1 chess_row_1_1 chess_row_1_2 chess_row_1_3 chess_row_1_4 chess_row_1_5 chess_row_1_6
@@ -60,10 +93,14 @@ define shape composite row_3 chess_row_3_1 chess_row_3_2 chess_row_3_3 chess_row
 define shape composite row_4 chess_row_4_1 chess_row_4_2 chess_row_4_3 chess_row_4_4 chess_row_4_5 chess_row_4_6
 define shape composite row_5 chess_row_5_1 chess_row_5_2 chess_row_5_3 chess_row_5_4 chess_row_5_5 chess_row_5_6
 define shape composite row_6 chess_row_6_1 chess_row_6_2 chess_row_6_3 chess_row_6_4 chess_row_6_5 chess_row_6_6
-define shape composite chess row_1 row_2 row_3 row_4 row_5 row_6
-define shape composite shapes rcone ptriangle bcylinder gsphere
-define shape composite root shapes chess
-
+define shape composite row_7 chess_row_7_1 chess_row_7_2 chess_row_7_3 chess_row_7_4 chess_row_7_5 chess_row_7_6
+define shape composite row_8 chess_row_8_1 chess_row_8_2 chess_row_8_3 chess_row_8_4 chess_row_8_5 chess_row_8_6
+define shape composite chess row_1 row_2 row_3 row_4 row_5 row_6 row_7 row_8
+define shape composite shapes rcone ptriangle bcylinder gsphere obox
+define shape composite shapes-r rcone-r ptriangle-r bcylinder-r gsphere-r obox-r
+define shape composite shapes-re rcone-re ptriangle-re bcylinder-re gsphere-re obox-re
+define shape composite root shapes chess shapes-r shapes-re
+# define shape composite root bcylinder
 
 # scene xform
 # transform gtriangle translate 0 	0	0
@@ -82,8 +119,8 @@ define camera eye 60.0 	0 	0	0 	0 	0 	-1 	0 	1 	0
 
 
 # camera xform
-# transform eye rotate 90 1 0 0
-transform eye translate 0 50 200
+# transform eye rotate 45 1 0 0
+# transform eye translate 100 25 150
 
 
 # ... and go
