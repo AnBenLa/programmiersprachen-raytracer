@@ -5,13 +5,3 @@ Programmiersprachen: Raytracer
 
 Framework for exercise 07.
 
-ToDo:
-	- Tone Mapping
-	- Kamera muss eventuell angepasst werden
-	- Translation, Skalierung und Rotation
-	- Compsite-Pattern
-	- Spiegelung auch für Objekte und keine Lichtquellen?
-	- finale Animation
-	- Dreieck, Kegel und Zylinder
-	- Refraktion hinzufügen
-	- Anti-Aliasing
