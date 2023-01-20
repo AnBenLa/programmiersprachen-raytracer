@@ -1,7 +1,14 @@
 Programmiersprachen: Raytracer
 ===========
+Simple CMake raytracer project with a OBJ-Loader and some performance optimisations.
 
-[![Build Status](https://secure.travis-ci.org/vrsys/programmiersprachen-raytracer.png)](http://travis-ci.org/vrsys/programmiersprachen-raytracer)
+Images:
+========================
+Simple animation:
+![Cmake](https://github.com/AnBenLa/programmiersprachen-raytracer/images/animation_rotation_spheres_more_refl.gif)
 
-Framework for exercise 07.
+700.000 vertices obj:
+![Cmake](https://github.com/AnBenLa/programmiersprachen-raytracer/bb_700_000_vertices_hd.jpg)
 
+Obj with material information:
+![Cmake](https://github.com/AnBenLa/programmiersprachen-raytracer/correct_blender_import.png)
