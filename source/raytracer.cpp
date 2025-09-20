@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
   std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
   #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-  readSDF_File("C:\\test.sdf", *scene);
+  readSDF_File("C:\\Users\\Admin\\Desktop\\programmiersprachen-raytracer\\chess-all-shapes.sdf", *scene);
   #else
   readSDF_File("/home/anbenla/raytracer/programmiersprachen-raytracer/Übung-7/Simple-Scene.sdf",*scene);
   #endif
@@ -25,8 +25,8 @@ int main(int argc, char* argv[])
   std::string const filename = "./checkerboard";
 
   Renderer renderer{ image_width, image_height, filename };
-
-  renderer.render(*scene, 1);
+  int frame = 1;
+  renderer.render(*scene, frame);
   //create separate thread to see updates of pixels while rendering
   //std::thread render_thread([&renderer, scene]() {renderer.render(*scene, 1);});
 
@@ -37,6 +37,8 @@ int main(int argc, char* argv[])
       window.close();
     }
     window.show(renderer.color_buffer());
+    frame+=1;
+    renderer.render(*scene, frame);
   }
 
   //"join" threads, i.e. synchronize main thread with render_thread
